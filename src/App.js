@@ -61,7 +61,7 @@ function Main () {
         <Grid stackable columns='equal'>
           <Grid.Row stretched>
             <EraNumber />
-            {/* <DappsCount /> */}
+            <DappsCount />
             <EraStaked />
             <NodeInfo />
           </Grid.Row>

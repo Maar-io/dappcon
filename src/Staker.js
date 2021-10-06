@@ -7,7 +7,6 @@ import {
   Dropdown,
   Container,
   Icon,
-  Image,
   Label
 } from 'semantic-ui-react';
 
@@ -123,7 +122,7 @@ function BalanceAnnotation (props) {
     : null;
 }
 
-export default function AccountSelector (props) {
+export default function Staker (props) {
   const { api, keyring } = useSubstrate();
   return keyring.getPairs && api.query ? <Main {...props} /> : null;
 }

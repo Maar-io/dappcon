@@ -6,11 +6,9 @@ import { useSubstrate } from './substrate-lib';
 function Main (props) {
   const { api } = useSubstrate();
   // const [era, setCurrentEra] = useState(0);
-  const [stakedTotal, setStakedTotal] = useState(42);
-  const [preApproval, setPreApproval] = useState('unknown');
+  const [stakedTotal, setStakedTotal] = useState(0);
   // const currentEra = api.query.dappsStaking.currentEra;
   const eraRewardsAndStakes = api.query.dappsStaking.eraRewardsAndStakes;
-  
 
   useEffect(() => {
     let unsubscribe;
@@ -18,10 +16,6 @@ function Main (props) {
     //   setCurrentEra(number.toNumber());
     // })
 
-    api.query.dappsStaking.preApprovalIsEnabled( (result) => {
-      setPreApproval(result.toString());
-    })
-      .catch(console.error);
     // api.query.dappsStaking.eraRewardsAndStakes(529, (result) => {
     //   const temp = result;
     //   console.log('staked = ', temp);
@@ -31,26 +25,6 @@ function Main (props) {
 
     return () => unsubscribe && unsubscribe();
   }, [api.query.dappsStaking, eraRewardsAndStakes]);
-
-  // useEffect(() => {
-  //   let unsubscribeAll = null;
-  //   currentEra(number => {
-  //     setCurrentEra(number.toNumber());
-  //     setEraCountdown(blockPerEra.toNumber() * blockDuration);
-  //   })
-  //     .then(unsub => {
-  //       unsubscribeAll = unsub;
-  //     })
-  //     .catch(console.error);
-
-  //   console.log('currentEra', currentEra);
-  //   console.log('blockPerEra', blockPerEra);
-  //   return () => unsubscribeAll && unsubscribeAll();
-  // }, [currentEra, blockPerEra]);
-
-  // const countDown = () => {
-  //   setEraCountdown(time => time - 1);
-  // };
 
   return (
     <Grid.Column>
@@ -62,16 +36,16 @@ function Main (props) {
           />
         </Card.Content>
         <Card.Content extra>
-         preappoval enabled: {preApproval}
+         stake
         </Card.Content>
       </Card>
     </Grid.Column>
   );
 }
 
-export default function CurrentEra (props) {
+export default function EraStaked (props) {
   const { api } = useSubstrate();
-  return api.query.dappsStaking.currentEra
+  return api.query.dappsStaking.eraRewardsAndStakes
     ? <Main {...props} />
     : null;
 }

@@ -1,1 +1,22 @@
-{}
+{
+    "SmartContract": {
+        "_enum": {
+          "Evm": "H160",
+          "Wasm": "AccountId"
+        }
+      },
+      "EraRewardAndStake": {
+        "rewards": "Balance",
+        "staked": "Balance"
+      },
+      "EraIndex": "u32",
+      "StakingLedger": {
+        "total": "Balance",
+        "active": "Balance"
+      },
+      "EraStakingPoints": {
+        "total": "Balance",
+        "stakers": "BTreeMap<AccountId, Balance>",
+        "former_staked_era": "u32"
+      }
+}

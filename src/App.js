@@ -6,12 +6,15 @@ import { SubstrateContextProvider, useSubstrate } from './substrate-lib';
 import { DeveloperConsole } from './substrate-lib/components';
 
 import AccountSelector from './AccountSelector';
+import Staker from './Staker';
 // import Balances from './Balances';
-import BlockNumber from './BlockNumber';
+import EraStaked from './EraStaked';
+// import BlockNumber from './BlockNumber';
 import EraNumber from './EraNumber';
 import Events from './Events';
 import Interactor from './Interactor';
-import Metadata from './Metadata';
+import DappsCount from './DappsCount';
+// import Metadata from './Metadata';
 import NodeInfo from './NodeInfo';
 import TemplateModule from './TemplateModule';
 // import Transfer from './Transfer';
@@ -57,9 +60,9 @@ function Main () {
       <Container>
         <Grid stackable columns='equal'>
           <Grid.Row stretched>
-            <EraNumber/>
-            <Metadata />
-            <BlockNumber />
+            <EraNumber />
+            {/* <DappsCount /> */}
+            <EraStaked />
             <NodeInfo />
           </Grid.Row>
           {/* <Grid.Row stretched>
@@ -75,6 +78,12 @@ function Main () {
           </Grid.Row>
           <Grid.Row>
             <TemplateModule accountPair={accountPair} />
+          </Grid.Row>
+          <Grid.Row>
+            <Staker setAccountAddress={setAccountAddress}/>
+          </Grid.Row>
+          <Grid.Row>
+            <Staker setAccountAddress={setAccountAddress}/>
           </Grid.Row>
         </Grid>
       </Container>

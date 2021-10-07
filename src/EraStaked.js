@@ -2,36 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { Statistic, Grid, Card } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
+const DECIMALS = 1_000_000_000_000_000_000;
 
 function Main (props) {
   const { api } = useSubstrate();
-  // const [era, setCurrentEra] = useState(0);
+  const [era, setCurrentEra] = useState(0);
   const [stakedTotal, setStakedTotal] = useState(0);
-  // const currentEra = api.query.dappsStaking.currentEra;
-  const eraRewardsAndStakes = api.query.dappsStaking.eraRewardsAndStakes;
 
   useEffect(() => {
     let unsubscribe;
-    // currentEra(number => {
-    //   setCurrentEra(number.toNumber());
-    // })
+    api.query.dappsStaking.currentEra(e => {
+      setCurrentEra(e.toNumber());
+    });
 
-    // api.query.dappsStaking.eraRewardsAndStakes(529, (result) => {
-    //   const temp = result;
-    //   console.log('staked = ', temp);
-    //   setStakedTotal(temp);
-    // })
-    //   .catch(console.error);
+    api.query.dappsStaking.eraRewardsAndStakes(era, (result) => {
+      if (result.isNone) {
+        setStakedTotal('<None>');
+      } else {
+        const tvl = result.unwrap().staked.valueOf() / DECIMALS;
+        setStakedTotal(tvl);
+      }
+    })
+      .catch(console.error);
 
     return () => unsubscribe && unsubscribe();
-  }, [api.query.dappsStaking, eraRewardsAndStakes]);
+  }, [api.query.dappsStaking, era]);
 
   return (
     <Grid.Column>
       <Card>
         <Card.Content textAlign='center'>
           <Statistic
-            label='Staked tokens'
+            label='TVL in dApps'
             value={stakedTotal}
           />
         </Card.Content>
@@ -45,7 +47,7 @@ function Main (props) {
 
 export default function EraStaked (props) {
   const { api } = useSubstrate();
-  return api.query.dappsStaking.eraRewardsAndStakes
+  return api.query.dappsStaking
     ? <Main {...props} />
     : null;
 }

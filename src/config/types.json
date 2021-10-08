@@ -17,6 +17,7 @@
       "EraStakingPoints": {
         "total": "Balance",
         "stakers": "BTreeMap<AccountId, Balance>",
-        "former_staked_era": "u32"
+        "former_staked_era": "u32",
+        "claimed_rewards": "Balance"
       }
 }

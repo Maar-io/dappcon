@@ -12,7 +12,7 @@ import EraStaked from './EraStaked';
 // import BlockNumber from './BlockNumber';
 import EraNumber from './EraNumber';
 import Events from './Events';
-import Interactor from './Interactor';
+import DSInteractor from './DSInteractor';
 import DappsCount from './DappsCount';
 // import Metadata from './Metadata';
 import NodeInfo from './NodeInfo';
@@ -73,13 +73,14 @@ function Main () {
             <Upgrade accountPair={accountPair} />
           </Grid.Row> */}
           <Grid.Row>
-            <Interactor accountPair={accountPair} />
+            <DSInteractor accountPair={accountPair} />
             <Events />
           </Grid.Row>
           <Grid.Row>
             <TemplateModule accountPair={accountPair} />
           </Grid.Row>
           <Grid.Row>
+          <h1>Stakers</h1>
             <Staker setAccountAddress={setAccountAddress}/>
           </Grid.Row>
           <Grid.Row>

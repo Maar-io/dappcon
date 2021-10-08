@@ -47,6 +47,7 @@ function Main (props) {
           />
         </Card.Content>
         <Card.Content extra>
+          Seconds until new era :
           <Icon name='time' /> {eraCountdown}
         </Card.Content>
       </Card>

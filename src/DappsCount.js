@@ -10,25 +10,37 @@ function Main (props) {
   const [preApproval, setPreApproval] = useState('unknown');
 
   const getAddressEnum = (address) => (
-    [{"Evm": address}]
-  );
+      {'Evm': address}
+    );
 
-  const regDapp = api.query.dappsStaking.registeredDevelopers;
+  // const contractEraStake = api.query.dappsStaking.contractEraStake;
+  // useEffect(() => {
+  //   let unsubscribeAll = null;
+  //   contractEraStake(getAddressEnum(CONTRACT), 529, result => {
+  //     console.log('contractEraStake ', result.unwrap().toHuman());
+  //   })
+  //   .then(unsub => {
+  //     unsubscribeAll = unsub;
+  //   })
+  //   .catch(console.error);
+  //   return () => unsubscribeAll && unsubscribeAll();
+  // }, [contractEraStake]);
+
+
+  const regDapp = api.query.dappsStaking.registeredDapps;
   useEffect(() => {
     let unsubscribe;
     api.query.dappsStaking.preApprovalIsEnabled((result) => {
       setPreApproval(result.toString());
     });
     console.log(getAddressEnum(CONTRACT));
-    regDapp({}, result => {
+    regDapp(getAddressEnum(CONTRACT), result => {
       if (result.isNone) {
         setDappsCount('<None>');
         console.log('registeredDapps <None>');
       } else {
-        // const tvl = result.unwrap().staked.valueOf() / DECIMALS;
-        // setStakedTotal(tvl);
         setDappsCount(100);
-        console.log('registeredDapps.unwrap()', result.unwrap());
+        console.log('registeredDapps result', result.toString());
       }
     }).then(unsub => {
       unsubscribe = unsub;
@@ -37,7 +49,7 @@ function Main (props) {
     console.log('registeredDapps end', dappsCount);
 
     return () => unsubscribe && unsubscribe();
-  }, [api.query.dappsStaking, dappsCount]);
+  }, [regDapp]);
 
   return (
     <Grid.Column>

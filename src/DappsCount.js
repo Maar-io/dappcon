@@ -14,14 +14,14 @@ function Main (props) {
       setPreApproval(result.toString());
     });
 
-    api.query.dappsStaking.registeredDapps.keys().then(
+    unsubscribe = api.query.dappsStaking.registeredDapps.keys().then(
       result => {
         setDappsCount(result.length);
       }
     )
       .catch(console.error);
 
-    return () => unsubscribe && unsubscribe();
+    return () => unsubscribe;
   }, [api.query.dappsStaking, api.query.dappsStaking.registeredDapps]);
 
   return (

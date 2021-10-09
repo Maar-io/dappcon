@@ -19,7 +19,7 @@ function Main (props) {
       if (result.isNone) {
         setStakedTotal('<None>');
       } else {
-        const tvl = result.unwrap().staked.valueOf() / DECIMALS;
+        const tvl = parseInt(result.unwrap().staked.valueOf() / DECIMALS);
         setStakedTotal(tvl);
       }
     })

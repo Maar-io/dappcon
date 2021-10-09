@@ -6,7 +6,7 @@ import { SubstrateContextProvider, useSubstrate } from './substrate-lib';
 import { DeveloperConsole } from './substrate-lib/components';
 
 import AccountSelector from './AccountSelector';
-import Staker from './Staker';
+import ContractExplorer from './ContractExplorer';
 // import Balances from './Balances';
 import EraStaked from './EraStaked';
 // import BlockNumber from './BlockNumber';
@@ -16,6 +16,7 @@ import DSInteractor from './DSInteractor';
 import DappsCount from './DappsCount';
 // import Metadata from './Metadata';
 import NodeInfo from './NodeInfo';
+import Staker from './Staker';
 import TemplateModule from './TemplateModule';
 // import Transfer from './Transfer';
 // import Upgrade from './Upgrade';
@@ -73,7 +74,7 @@ function Main () {
             <Upgrade accountPair={accountPair} />
           </Grid.Row> */}
           <Grid.Row>
-            <DSInteractor accountPair={accountPair} />
+            <ContractExplorer />
             <Events />
           </Grid.Row>
           <Grid.Row>
@@ -84,6 +85,7 @@ function Main () {
             <Staker setAccountAddress={setAccountAddress}/>
           </Grid.Row>
           <Grid.Row>
+            <DSInteractor accountPair={accountPair} />
             <Staker setAccountAddress={setAccountAddress}/>
           </Grid.Row>
         </Grid>

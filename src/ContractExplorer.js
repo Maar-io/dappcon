@@ -18,20 +18,14 @@ function Main(props) {
   const [buttonQuery, setButtonQuery] = useState(true);
   const [selectedContract, setSelectedContract] = useState(0);
   const [lastClaimed, setLastClaimed] = useState(0);
-  const [lastStaked, setLastStaked] = useState('');
+  const [lastStaked, setLastStaked] = useState(0);
+  const [formState, setFormState] = useState('');
 
   const getAddressEnum = (address) => (
-    {'Evm': address}
+    { 'Evm': address }
   );
 
-  const initFormState = {
-    palletRpc: '',
-    callable: '',
-    inputParams: []
-  };
 
-  const [formState, setFormState] = useState(initFormState);
-  const { palletRpc, callable, inputParams } = formState;
 
   const updateCallables = () => {
     const c =
@@ -44,51 +38,52 @@ function Main(props) {
     setButtonQuery(true);
   };
 
-  useEffect(updateCallables, [api, interxType, palletRpc]);
 
   const onContractChange = (_, data) => {
-    setFormState(formState => {
-      let res;
-      const { state, value } = data;
-      if (typeof state === 'object') {
-        // Input parameter updated
-        const { ind, paramField: { type } } = state;
-        const inputParams = [...formState.inputParams];
-        inputParams[ind] = { type, value };
-        res = { ...formState, inputParams };
-      } else if (state === 'palletRpc') {
-        res = { ...formState, [state]: value, callable: '', inputParams: [] };
-        console.log('onContractChange palletRpc',)
-      } else if (state === 'callable') {
-        res = { ...formState, [state]: value, inputParams: [] };
-        setButtonQuery(false);
-        setStatus('');
-        setSelectedContract(getAddressEnum(callable));
-        console.log('onContractChange callable', getAddressEnum(callable));
-      }
-      return res;
-    });
+    console.log('onContractChange value', data.value);
+    setButtonQuery(false);
+    setLastClaimed('?');
+    setLastStaked('?');
+    setSelectedContract(getAddressEnum(data.value));
+    setFormState(data.value)
+    // setFormState(formState => {
+    //   let res;
+    //   const { state, value } = data;
+    //   if (typeof state === 'object') {
+    //     // Input parameter updated
+    //     const { ind, paramField: { type } } = state;
+    //     const inputParams = [...formState.inputParams];
+    //     inputParams[ind] = { type, value };
+    //     res = { ...formState, inputParams };
+    //     console.log('setFormState object value', value);
+    //     console.log('setFormState res', res);
+    //   } else {
+    //     res = { ...formState, [state]: value, inputParams: [] };
+    //     console.log('setFormState else value', value);
+    //     console.log('setFormState res', res);
+    //     setSelectedContract(getAddressEnum(data.value));
+    //     // console.log('onContractChange selectedContract', selectedContract);
+    //   }
+    //   return res;
+    // });
   };
 
 
   const onQueryClick = (_, data) => {
     let unsubscribe;
 
-    const { state, value } = data;
-    let res;
-    res = { ...formState, [state]: value, callable: '', inputParams: [] };
-    console.log('onQueryClick selected selectedContract is', selectedContract)
+    console.log('onQueryClick selectedContract is', selectedContract)
     setButtonQuery(true)
 
-    unsubscribe = api.query.dappsStaking.contractLastStaked( selectedContract, result => {
+    unsubscribe = api.query.dappsStaking.contractLastStaked(selectedContract, result => {
       result.isNone ? setStatus('never s') : setLastStaked(result.unwrap().toHuman());
     })
-    .catch(console.error);
+      .catch(console.error);
 
-    unsubscribe = api.query.dappsStaking.contractLastClaimed( selectedContract, result => {
+    unsubscribe = api.query.dappsStaking.contractLastClaimed(selectedContract, result => {
       result.isNone ? setStatus('never c') : setLastClaimed(result.unwrap().toHuman());
     })
-    .catch(console.error);
+      .catch(console.error);
 
     // unsubscribe = api.query.dappsStaking.registeredDapps.keys().then(
     //   result => {
@@ -98,6 +93,8 @@ function Main(props) {
 
     return () => unsubscribe;
   };
+  useEffect(updateCallables, [api]);
+  useEffect(onQueryClick, [lastClaimed, lastStaked]);
 
   return (
     <Grid.Column width={8}>
@@ -111,8 +108,7 @@ function Main(props) {
             onChange={onContractChange}
             search
             selection
-            state='callable'
-            value={callable}
+            value={formState}
             options={callables}
           />
         </Form.Field>
@@ -125,17 +121,20 @@ function Main(props) {
             color={buttonQuery ? 'green' : 'red'}
           />
         </Form.Field>
-        <div style={{ overflowWrap: 'break-word' }}>{displayData}</div>
-        {/* <div style={{ overflowWrap: 'break-word' }}>{status}</div> */}
+        {/* <div style={{ overflowWrap: 'break-word' }}>{displayData}</div> */}
+        <div style={{ overflowWrap: 'break-word' }}>
+          <h3> lastClaimed = {lastClaimed} </h3>
+          <h3> lastStaked = {lastStaked} </h3>
+        </div>
       </Form>
     </Grid.Column>
   );
 }
-function displayData () {
-    return <h3
-      {...lastClaimed}
-      {...lastStaked}
-    />;
+function displayData(prop) {
+  return <h3
+    {...lastClaimed}
+    {...lastStaked}
+  />;
 }
 
 export default function ContractExplorer(props) {

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Grid, Form, Dropdown, Button } from 'semantic-ui-react';
 import { useSubstrate } from './substrate-lib';
+import { blake2AsHex } from '@polkadot/util-crypto';
+
 
 function Main (props) {
   const { api } = useSubstrate();
@@ -18,9 +20,11 @@ function Main (props) {
   const updateCallables = () => {
     api.query.dappsStaking.registeredDapps.keys().then(
       result => {
-        console.log('updateCallables result', result.value);
-        const callables = result.map(c => ({ key: c, value: c, text: c }));
-        console.log('updateCallables callables', callables.value);
+        console.log('registeredDapps result', result);
+        const r = result.map(c => '0x' + c.toString().slice(-40))
+        console.log(r);
+        const callables = r.map(c => ({ key: c, value: c, text: c }));
+        console.log('updateCallables callables', callables);
         setCallables(callables);
       }
     )
@@ -30,8 +34,15 @@ function Main (props) {
     //     { key: '0x0000000000000000000000000000000000000002', value: '0x0000000000000000000000000000000000000002', text: '0x0000000000000000000000000000000000000002' },
     //     { key: '0x0000000000000000000000000000000000000003', value: '0x0000000000000000000000000000000000000003', text: '0x0000000000000000000000000000000000000003' },
     //     { key: '0x0000000000000000000000000000000000000004', value: '0x0000000000000000000000000000000000000004', text: '0x0000000000000000000000000000000000000004' }
-    //   ];
+    //   ];        0x000.000.000.000.000.000.000.000.000.000.000.000.000.0
     // setCallables(c);
+
+    //api.query.dappsStaking.registeredDapps.keys().then(
+      // result => {
+      //   console.log('registeredDapps result', result);
+      //   const r = result.map(c => '0x' + c.toString().slice(-40))
+      //   console.log(r);
+      // }).catch(console.error);
     setButtonQuery(true);
   };
 
@@ -49,7 +60,7 @@ function Main (props) {
     setButtonQuery(true);
 
     unsubscribe = api.query.dappsStaking.contractLastStaked(selectedContract, result => {
-      result.isNone ? setLastStaked('never s') : setLastStaked(result.unwrap().toHuman());
+      result.isNone ? setLastStaked('never s') : setLastStaked(result.unwrap().toNumber());
     })
       .catch(console.error);
 

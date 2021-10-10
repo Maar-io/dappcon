@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Grid, Form, Dropdown, Button } from 'semantic-ui-react';
+import { Grid, Form, Dropdown, Table, Header, Image } from 'semantic-ui-react';
 import { useSubstrate } from './substrate-lib';
 import { blake2AsHex } from '@polkadot/util-crypto';
 import { DeveloperConsole } from './substrate-lib/components';
@@ -17,7 +17,6 @@ function Main(props) {
   const [claimedRewards, setClaimedRewards] = useState(0);
   const [numStakers, setNumStakers] = useState(0);
   const [stakers, setStakers] = useState([]);
-
 
   const getAddressEnum = (address) => (
     { 'Evm': address }
@@ -74,8 +73,9 @@ function Main(props) {
   }
 
   const queryContractEraStake = () => {
-    api.query.dappsStaking.contractEraStake(getAddressEnum(getAddressEnum(selectedContract)), lastStaked, result => {
+    api.query.dappsStaking.contractEraStake(getAddressEnum(selectedContract), lastStaked, result => {
       if (result.isNone) {
+        console.log('queryContractEraStake result.isNone');
         setTotalStaked(0);
         setClaimedRewards(0);
         setNumStakers(0);
@@ -83,8 +83,11 @@ function Main(props) {
       else {
         console.log('queryContractEraStake res', result.unwrap().toHuman());
         setTotalStaked(result.unwrap().total.toHuman());
+        console.log('queryContractEraStake total', result.unwrap().total.toHuman());
         setClaimedRewards(result.unwrap().claimed_rewards.toHuman());
+        console.log('queryContractEraStake total', result.unwrap().claimed_rewards.toHuman());
         setNumStakers(result.unwrap().stakers.size);
+        console.log('queryContractEraStake total', result.unwrap().stakers.size);
         // setStakers(result.unwrap().stakers);
       };
     })
@@ -118,15 +121,15 @@ function Main(props) {
             options={callables}
           />
         </Form.Field>
-        <DisplayPlain
-          developer = {developer}
-          numStakers = {numStakers}
-          lastClaimed = {lastClaimed}
-          lastStaked = {lastStaked}
-          totalStaked = {totalStaked}
-          claimedRewards = {claimedRewards}
-          contract = {selectedContract}
-          />
+        <DisplayTable
+          developer={developer}
+          numStakers={numStakers}
+          lastClaimed={lastClaimed}
+          lastStaked={lastStaked}
+          totalStaked={totalStaked}
+          claimedRewards={claimedRewards}
+          contract={selectedContract}
+        />
       </Form>
     </Grid.Column>
   );
@@ -143,6 +146,85 @@ function DisplayPlain(props) {
     <h3> claimed rewards = {props.claimedRewards} </h3>
     <h3> number of stakers = {props.numStakers} </h3>
     {/* <h3> stakers = {stakers} </h3> */}
+  </div>
+}
+
+function DisplayTable(props) {
+  return <div style={{ overflowWrap: 'break-word' }}>
+    <img alt='robots' src={`https://robohash.org/${props.contract}`} />
+    <Table>
+      <Table.Header>
+        <Table.Row>
+          <Table.HeaderCell >Contract Address</Table.HeaderCell>
+          <Table.HeaderCell >{props.contract}</Table.HeaderCell>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        <Table.Row>
+          <Table.Cell>Developer's account</Table.Cell>
+          <Table.Cell>
+            <Header as='h4' image>
+              <Image src='https://robohash.org/${props.contract}' size='mini' />
+              <Header.Content>
+                {props.contract}
+              </Header.Content>
+            </Header>
+          </Table.Cell>
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell>
+          <Header as='h2'>
+            <Header.Content>
+              {props.lastStaked}
+              <Header.Subheader>Contract Last Staked</Header.Subheader>
+            </Header.Content>
+          </Header>
+          </Table.Cell>
+          <Table.Cell >
+          <Header as='h2'>
+            <Header.Content>
+              {props.lastClaimed}
+              <Header.Subheader>Contract Last Claimed</Header.Subheader>
+            </Header.Content>
+          </Header>
+          </Table.Cell>
+          <Table.Cell>
+          <Header as='h2'>
+            <Header.Content>
+              {props.numStakers}
+              <Header.Subheader>NUmber of Stakers</Header.Subheader>
+            </Header.Content>
+          </Header>
+          </Table.Cell>
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell>
+          <Header as='h2'>
+            <Header.Content>
+              {props.totalStaked}
+              <Header.Subheader>Total Staked</Header.Subheader>
+            </Header.Content>
+          </Header>
+          </Table.Cell>
+          <Table.Cell >
+          <Header as='h2'>
+            <Header.Content>
+              {props.claimedRewards}
+              <Header.Subheader>Claimed Rewards</Header.Subheader>
+            </Header.Content>
+          </Header>
+          </Table.Cell>
+          <Table.Cell>
+          <Header as='h2'>
+            <Header.Content>
+              ?
+              <Header.Subheader>TBA</Header.Subheader>
+            </Header.Content>
+          </Header>
+          </Table.Cell>
+        </Table.Row>
+      </Table.Body>
+    </Table>
   </div>
 }
 

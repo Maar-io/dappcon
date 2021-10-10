@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Grid, Form, Dropdown, Button } from 'semantic-ui-react';
 import { useSubstrate } from './substrate-lib';
 import { blake2AsHex } from '@polkadot/util-crypto';
+import { DeveloperConsole } from './substrate-lib/components';
 
 
 function Main(props) {
@@ -15,6 +16,8 @@ function Main(props) {
   const [totalStaked, setTotalStaked] = useState(0);
   const [claimedRewards, setClaimedRewards] = useState(0);
   const [numStakers, setNumStakers] = useState(0);
+  const [stakers, setStakers] = useState([]);
+
 
   const getAddressEnum = (address) => (
     { 'Evm': address }
@@ -36,13 +39,13 @@ function Main(props) {
 
   const onContractChange = (_, data) => {
     console.log('onContractChange value', data.value);
-    setSelectedContract(getAddressEnum(data.value));
+    setSelectedContract(data.value);
     setFormState(data.value);
   };
 
   const queryLastClaimed = () => {
     let res;
-    api.query.dappsStaking.contractLastClaimed(selectedContract, result => {
+    api.query.dappsStaking.contractLastClaimed(getAddressEnum(selectedContract), result => {
       result.isNone ? res = 'never' : res = result.unwrap().toHuman();
       console.log('queryLastClaimed res', res);
       setLastClaimed(res);
@@ -52,7 +55,7 @@ function Main(props) {
 
   const queryLastStaked = () => {
     let res;
-    api.query.dappsStaking.contractLastStaked(selectedContract, result => {
+    api.query.dappsStaking.contractLastStaked(getAddressEnum(selectedContract), result => {
       result.isNone ? res = 'never' : res = result.unwrap().toString();
       console.log('queryLastStaked res', res);
       setLastStaked(res);
@@ -62,7 +65,7 @@ function Main(props) {
 
   const queryDeveloper = () => {
     let res;
-    api.query.dappsStaking.registeredDapps(selectedContract, result => {
+    api.query.dappsStaking.registeredDapps(getAddressEnum(selectedContract), result => {
       result.isNone ? res = 'none' : res = result.unwrap().toHuman();
       console.log('queryDeveloper res', res);
       setDeveloper(res);
@@ -71,7 +74,7 @@ function Main(props) {
   }
 
   const queryContractEraStake = () => {
-    api.query.dappsStaking.contractEraStake(selectedContract, lastStaked, result => {
+    api.query.dappsStaking.contractEraStake(getAddressEnum(getAddressEnum(selectedContract)), lastStaked, result => {
       if (result.isNone) {
         setTotalStaked(0);
         setClaimedRewards(0);
@@ -82,6 +85,7 @@ function Main(props) {
         setTotalStaked(result.unwrap().total.toHuman());
         setClaimedRewards(result.unwrap().claimed_rewards.toHuman());
         setNumStakers(result.unwrap().stakers.size);
+        // setStakers(result.unwrap().stakers);
       };
     })
       .catch(console.error);
@@ -114,17 +118,32 @@ function Main(props) {
             options={callables}
           />
         </Form.Field>
-        <div style={{ overflowWrap: 'break-word' }}>
-          <h3> developer = {developer} </h3>
-          <h3> lastClaimed = {lastClaimed} </h3>
-          <h3> lastStaked = {lastStaked} </h3>
-          <h3> totalStaked = {totalStaked} </h3>
-          <h3> claimed rewards = {claimedRewards} </h3>
-          <h3> number of stakers = {numStakers} </h3>
-        </div>
+        <DisplayPlain
+          developer = {developer}
+          numStakers = {numStakers}
+          lastClaimed = {lastClaimed}
+          lastStaked = {lastStaked}
+          totalStaked = {totalStaked}
+          claimedRewards = {claimedRewards}
+          contract = {selectedContract}
+          />
       </Form>
     </Grid.Column>
   );
+}
+
+function DisplayPlain(props) {
+  return <div style={{ overflowWrap: 'break-word' }}>
+    <img alt='robots' src={`https://robohash.org/${props.contract}`} />
+    <h3> contract = {props.contract} </h3>
+    <h3> developer = {props.developer} </h3>
+    <h3> lastClaimed = {props.lastClaimed} </h3>
+    <h3> lastStaked = {props.lastStaked} </h3>
+    <h3> totalStaked = {props.totalStaked} </h3>
+    <h3> claimed rewards = {props.claimedRewards} </h3>
+    <h3> number of stakers = {props.numStakers} </h3>
+    {/* <h3> stakers = {stakers} </h3> */}
+  </div>
 }
 
 export default function ContractExplorer(props) {

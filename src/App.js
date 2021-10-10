@@ -82,11 +82,9 @@ function Main () {
           </Grid.Row>
           <Grid.Row>
           <h1>Stakers</h1>
-            <Staker setAccountAddress={setAccountAddress}/>
           </Grid.Row>
           <Grid.Row>
             <DSInteractor accountPair={accountPair} />
-            <Staker setAccountAddress={setAccountAddress}/>
           </Grid.Row>
         </Grid>
       </Container>

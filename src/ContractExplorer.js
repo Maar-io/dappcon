@@ -4,7 +4,7 @@ import { useSubstrate } from './substrate-lib';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
 
-function Main (props) {
+function Main(props) {
   const { api } = useSubstrate();
   const [callables, setCallables] = useState([]);
   const [selectedContract, setSelectedContract] = useState(0);
@@ -12,12 +12,15 @@ function Main (props) {
   const [lastStaked, setLastStaked] = useState(0);
   const [formState, setFormState] = useState(0);
   const [developer, setDeveloper] = useState(0);
+  const [totalStaked, setTotalStaked] = useState(0);
+  const [claimedRewards, setClaimedRewards] = useState(0);
+  const [numStakers, setNumStakers] = useState(0);
 
   const getAddressEnum = (address) => (
     { 'Evm': address }
   );
-
   const updateCallables = () => {
+
     api.query.dappsStaking.registeredDapps.keys().then(
       result => {
         console.log('registeredDapps result', result);
@@ -37,25 +40,59 @@ function Main (props) {
     setFormState(data.value);
   };
 
+  const queryLastClaimed = () => {
+    let res;
+    api.query.dappsStaking.contractLastClaimed(selectedContract, result => {
+      result.isNone ? res = 'never' : res = result.unwrap().toHuman();
+      console.log('queryLastClaimed res', res);
+      setLastClaimed(res);
+    })
+      .catch(console.error);
+  }
+
+  const queryLastStaked = () => {
+    let res;
+    api.query.dappsStaking.contractLastStaked(selectedContract, result => {
+      result.isNone ? res = 'never' : res = result.unwrap().toString();
+      console.log('queryLastStaked res', res);
+      setLastStaked(res);
+    })
+      .catch(console.error);
+  }
+
+  const queryDeveloper = () => {
+    let res;
+    api.query.dappsStaking.registeredDapps(selectedContract, result => {
+      result.isNone ? res = 'none' : res = result.unwrap().toHuman();
+      console.log('queryDeveloper res', res);
+      setDeveloper(res);
+    })
+      .catch(console.error);
+  }
+
+  const queryContractEraStake = () => {
+    api.query.dappsStaking.contractEraStake(selectedContract, lastStaked, result => {
+      if (result.isNone) {
+        setTotalStaked(0);
+        setClaimedRewards(0);
+        setNumStakers(0);
+      }
+      else {
+        console.log('queryContractEraStake res', result.unwrap().toHuman());
+        setTotalStaked(result.unwrap().total.toHuman());
+        setClaimedRewards(result.unwrap().claimed_rewards.toHuman());
+        setNumStakers(result.unwrap().stakers.size);
+      };
+    })
+      .catch(console.error);
+  }
+
   const doQuery = (_, data) => {
-    let unsubscribe;
-
     console.log('doQuery selectedContract is', selectedContract);
-    unsubscribe = api.query.dappsStaking.contractLastStaked(selectedContract, result => {
-      result.isNone ? setLastStaked('never') : setLastStaked(result.unwrap().toNumber());
-    })
-      .catch(console.error);
-
-    unsubscribe = api.query.dappsStaking.contractLastClaimed(selectedContract, result => {
-      result.isNone ? setLastClaimed('never') : setLastClaimed(result.unwrap().toHuman());
-    })
-      .catch(console.error);
-
-    unsubscribe = api.query.dappsStaking.registeredDapps(selectedContract, result => {
-        result.isNone ? setDeveloper('none') : setDeveloper(result.unwrap().toHuman());
-      })
-        .catch(console.error);
-    return () => unsubscribe;
+    queryLastStaked();
+    queryLastClaimed();
+    queryDeveloper();
+    queryContractEraStake();
   };
 
   useEffect(updateCallables, [api.query.dappsStaking]);
@@ -81,13 +118,16 @@ function Main (props) {
           <h3> developer = {developer} </h3>
           <h3> lastClaimed = {lastClaimed} </h3>
           <h3> lastStaked = {lastStaked} </h3>
+          <h3> totalStaked = {totalStaked} </h3>
+          <h3> claimed rewards = {claimedRewards} </h3>
+          <h3> number of stakers = {numStakers} </h3>
         </div>
       </Form>
     </Grid.Column>
   );
 }
 
-export default function ContractExplorer (props) {
+export default function ContractExplorer(props) {
   const { api } = useSubstrate();
   return api ? <Main {...props} /> : null;
 }

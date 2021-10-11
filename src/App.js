@@ -1,11 +1,11 @@
 import React, { useState, createRef } from 'react';
-import { Container, Dimmer, Loader, Grid, Sticky, Message } from 'semantic-ui-react';
+import { Container, Dimmer, Loader, Grid, Sticky, Message, Segment, Rail, Image, Divider } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 
 import { SubstrateContextProvider, useSubstrate } from './substrate-lib';
 import { DeveloperConsole } from './substrate-lib/components';
 
-import AccountSelector from './AccountSelector';
+// import NetworkSelector from './NetworkSelector';
 import ContractExplorer from './ContractExplorer';
 // import Balances from './Balances';
 import EraStaked from './EraStaked';
@@ -21,7 +21,7 @@ import TemplateModule from './TemplateModule';
 // import Transfer from './Transfer';
 // import Upgrade from './Upgrade';
 
-function Main () {
+function Main() {
   const [accountAddress, setAccountAddress] = useState(null);
   const { apiState, keyring, keyringState, apiError } = useSubstrate();
   const accountPair =
@@ -56,9 +56,38 @@ function Main () {
   return (
     <div ref={contextRef}>
       <Sticky context={contextRef}>
-        <AccountSelector setAccountAddress={setAccountAddress} />
+        <Grid centered columns={2}>
+          <Segment>
+            <Grid.Row>
+                <Image src={`${process.env.PUBLIC_URL}/assets/astar.png`} size='medium' />
+              <h1> dApps Staking Dashboard </h1>
+            </Grid.Row>
+          </Segment>
+        </Grid>
       </Sticky>
+      <Divider />
       <Container>
+      <style>
+      {`
+      html, body {
+        background-color: #252839 !important;
+      }
+      p {
+        align-content: center;
+        background-color: #495285;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 6em;
+      }
+      p > span {
+        opacity: 0.4;
+        text-align: center;
+      }
+    }
+    `}
+    </style>
         <Grid stackable columns='equal'>
           <Grid.Row stretched>
             <EraNumber />
@@ -66,6 +95,7 @@ function Main () {
             <EraStaked />
             <NodeInfo />
           </Grid.Row>
+          <Divider />
           {/* <Grid.Row stretched>
             <Balances />
           </Grid.Row> */}
@@ -74,15 +104,11 @@ function Main () {
             <Upgrade accountPair={accountPair} />
           </Grid.Row> */}
           <Grid.Row>
-            <ContractExplorer />
-            <Events />
+            <Segment raised>
+              <ContractExplorer />
+            </Segment>
           </Grid.Row>
-          <Grid.Row>
-            <TemplateModule accountPair={accountPair} />
-          </Grid.Row>
-          <Grid.Row>
-          <h1>Stakers</h1>
-          </Grid.Row>
+          <Divider />
           <Grid.Row>
             <DSInteractor accountPair={accountPair} />
           </Grid.Row>
@@ -93,7 +119,7 @@ function Main () {
   );
 }
 
-export default function App () {
+export default function App() {
   return (
     <SubstrateContextProvider>
       <Main />

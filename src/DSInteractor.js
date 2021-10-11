@@ -13,7 +13,7 @@ function Main (props) {
   const [status, setStatus] = useState(null);
 
   const [interxType, setInterxType] = useState('QUERY');
-  const [palletRPCs, setPalletRPCs] = useState([]);
+  const [palletRPCs, setPalletRPCs] = useState([{key: 'dappsStaking', value: 'dappsStaking', text: 'dappsStaking'}]);
   const [callables, setCallables] = useState([]);
   const [paramFields, setParamFields] = useState([]);
 
@@ -36,12 +36,6 @@ function Main (props) {
     } else {
       return api.consts;
     }
-  };
-
-  const updatePalletRPCs = () => {
-    if (!api) { return; }
-    const palletRPCs = [{key: 'dappsStaking', value: 'dappsStaking', text: 'dappsStaking'}];
-    setPalletRPCs(palletRPCs);
   };
   
   const updateCallables = () => {
@@ -121,7 +115,6 @@ function Main (props) {
     setParamFields(paramFields);
   };
 
-  useEffect(updatePalletRPCs, [api, interxType]);
   useEffect(updateCallables, [api, interxType, palletRpc]);
   useEffect(updateParamFields, [api, interxType, palletRpc, callable, jsonrpc]);
 

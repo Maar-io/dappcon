@@ -21,8 +21,8 @@ function Main(props) {
   const getAddressEnum = (address) => (
     { 'Evm': address }
   );
-  const updateCallables = () => {
 
+  const updateCallables = () => {
     api.query.dappsStaking.registeredDapps.keys().then(
       result => {
         console.log('registeredDapps result', result);
@@ -36,7 +36,16 @@ function Main(props) {
       .catch(console.error);
   };
 
+  const resetContractInfo = () => {
+    setDeveloper(0);
+    setLastStaked(0);
+    setLastClaimed(0);
+    setNumStakers('?');
+    setClaimedRewards('?');
+  };
+
   const onContractChange = (_, data) => {
+    resetContractInfo()
     console.log('onContractChange value', data.value);
     setSelectedContract(data.value);
     setFormState(data.value);
@@ -63,6 +72,7 @@ function Main(props) {
   }
 
   const queryDeveloper = () => {
+    console.log('queryDeveloper selectedContract is', selectedContract);
     let res;
     api.query.dappsStaking.registeredDapps(getAddressEnum(selectedContract), result => {
       result.isNone ? res = 'none' : res = result.unwrap().toHuman();
@@ -73,6 +83,7 @@ function Main(props) {
   }
 
   const queryContractEraStake = () => {
+    console.log('queryContractEraStake selectedContract is', selectedContract, "last staked", lastStaked);
     api.query.dappsStaking.contractEraStake(getAddressEnum(selectedContract), lastStaked, result => {
       if (result.isNone) {
         console.log('queryContractEraStake result.isNone');
@@ -98,12 +109,16 @@ function Main(props) {
     console.log('doQuery selectedContract is', selectedContract);
     queryLastStaked();
     queryLastClaimed();
+  };
+
+  const doQueryContractInfo = () => {
     queryDeveloper();
     queryContractEraStake();
-  };
+  }
 
   useEffect(updateCallables, [api.query.dappsStaking]);
   useEffect(doQuery, [selectedContract]);
+  useEffect(doQueryContractInfo, [lastStaked]);
 
   return (
     <Grid.Column width={8}>
@@ -164,63 +179,63 @@ function DisplayTable(props) {
           <Table.Cell>Developer's account</Table.Cell>
           <Table.Cell>
             <Header as='h4' image>
-              <Image src='https://robohash.org/${props.contract}' size='mini' />
+              <Image src={`https://robohash.org/${props.developer}`} size='mini' />
               <Header.Content>
-                {props.contract}
+                {props.developer}
               </Header.Content>
             </Header>
           </Table.Cell>
         </Table.Row>
         <Table.Row>
           <Table.Cell>
-          <Header as='h2'>
-            <Header.Content>
-              {props.lastStaked}
-              <Header.Subheader>Contract Last Staked</Header.Subheader>
-            </Header.Content>
-          </Header>
+            <Header as='h2'>
+              <Header.Content>
+                {props.lastStaked}
+                <Header.Subheader>Contract Last Staked</Header.Subheader>
+              </Header.Content>
+            </Header>
           </Table.Cell>
           <Table.Cell >
-          <Header as='h2'>
-            <Header.Content>
-              {props.lastClaimed}
-              <Header.Subheader>Contract Last Claimed</Header.Subheader>
-            </Header.Content>
-          </Header>
+            <Header as='h2'>
+              <Header.Content>
+                {props.lastClaimed}
+                <Header.Subheader>Contract Last Claimed</Header.Subheader>
+              </Header.Content>
+            </Header>
           </Table.Cell>
           <Table.Cell>
-          <Header as='h2'>
-            <Header.Content>
-              {props.numStakers}
-              <Header.Subheader>NUmber of Stakers</Header.Subheader>
-            </Header.Content>
-          </Header>
+            <Header as='h2'>
+              <Header.Content>
+                {props.numStakers}
+                <Header.Subheader>Number of Stakers</Header.Subheader>
+              </Header.Content>
+            </Header>
           </Table.Cell>
         </Table.Row>
         <Table.Row>
           <Table.Cell>
-          <Header as='h2'>
-            <Header.Content>
-              {props.totalStaked}
-              <Header.Subheader>Total Staked</Header.Subheader>
-            </Header.Content>
-          </Header>
+            <Header as='h2'>
+              <Header.Content>
+                {props.totalStaked}
+                <Header.Subheader>Total Staked</Header.Subheader>
+              </Header.Content>
+            </Header>
           </Table.Cell>
           <Table.Cell >
-          <Header as='h2'>
-            <Header.Content>
-              {props.claimedRewards}
-              <Header.Subheader>Claimed Rewards</Header.Subheader>
-            </Header.Content>
-          </Header>
+            <Header as='h2'>
+              <Header.Content>
+                {props.claimedRewards}
+                <Header.Subheader>Claimed Rewards</Header.Subheader>
+              </Header.Content>
+            </Header>
           </Table.Cell>
           <Table.Cell>
-          <Header as='h2'>
-            <Header.Content>
-              ?
-              <Header.Subheader>TBA</Header.Subheader>
-            </Header.Content>
-          </Header>
+            <Header as='h2'>
+              <Header.Content>
+                ?
+                <Header.Subheader>TBA</Header.Subheader>
+              </Header.Content>
+            </Header>
           </Table.Cell>
         </Table.Row>
       </Table.Body>

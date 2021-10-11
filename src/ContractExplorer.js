@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Grid, Form, Dropdown, Table, Header, Image } from 'semantic-ui-react';
+import { Grid, Form, Dropdown, Table, Header, Image, Menu, Icon } from 'semantic-ui-react';
 import { useSubstrate } from './substrate-lib';
-import { blake2AsHex } from '@polkadot/util-crypto';
-import { DeveloperConsole } from './substrate-lib/components';
+import Stakers from './Stakers';
 
 
 function Main(props) {
@@ -99,7 +98,17 @@ function Main(props) {
         console.log('queryContractEraStake total', result.unwrap().claimed_rewards.toHuman());
         setNumStakers(result.unwrap().stakers.size);
         console.log('queryContractEraStake total', result.unwrap().stakers.size);
-        // setStakers(result.unwrap().stakers);
+        // const s = result.unwrap().stakers.map(entry => ({ account: entry, staked: entry}));
+        let stakerList;
+
+        // stakerList = Object.entries(result.unwrap().stakers.toHuman()).map((key, value) =>({account: key, staked: value}) )
+        // for (const [key, value] of Object.entries(result.unwrap().stakers.toHuman())) {
+        //   stakerList[key] = value;
+        // }
+        // setStakers(stakerList)
+        // console.log('queryContractEraStake stakers', stakerList);
+
+        //setStakers(result.unwrap().stakers);
       };
     })
       .catch(console.error);
@@ -145,6 +154,12 @@ function Main(props) {
           claimedRewards={claimedRewards}
           contract={selectedContract}
         />
+        {/* <DisplayAllTable
+          contracts = {callables}
+        /> */}
+        {/* <Stakers 
+          contract={selectedContract}
+          /> */}
       </Form>
     </Grid.Column>
   );
@@ -240,6 +255,51 @@ function DisplayTable(props) {
         </Table.Row>
       </Table.Body>
     </Table>
+  </div>
+}
+
+function DisplayAllTable(props) {
+  console.log(props.contracts);
+  return <div style={{ overflowWrap: 'break-word' }}>
+  <Table celled>
+    <Table.Header>
+      <Table.Row>
+        <Table.HeaderCell>Contract</Table.HeaderCell>
+        <Table.HeaderCell>Last Staked</Table.HeaderCell>
+      </Table.Row>
+    </Table.Header>
+
+    <Table.Body>
+    {
+        props.contracts && props.contracts.map((contract) =>
+          <Table.Row
+            key={contract}>
+            <Table.Cell>{contract.key}</Table.Cell>
+            <Table.Cell>{contract.key}</Table.Cell>
+          </Table.Row>
+        )
+      }
+    </Table.Body>
+
+    <Table.Footer>
+      <Table.Row>
+        <Table.HeaderCell colSpan='3'>
+          <Menu floated='right' pagination>
+            <Menu.Item as='a' icon>
+              <Icon name='chevron left' />
+            </Menu.Item>
+            <Menu.Item as='a'>1</Menu.Item>
+            <Menu.Item as='a'>2</Menu.Item>
+            <Menu.Item as='a'>3</Menu.Item>
+            <Menu.Item as='a'>4</Menu.Item>
+            <Menu.Item as='a' icon>
+              <Icon name='chevron right' />
+            </Menu.Item>
+          </Menu>
+        </Table.HeaderCell>
+      </Table.Row>
+    </Table.Footer>
+  </Table>
   </div>
 }
 

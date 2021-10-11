@@ -16,7 +16,6 @@ import DSInteractor from './DSInteractor';
 import DappsCount from './DappsCount';
 // import Metadata from './Metadata';
 import NodeInfo from './NodeInfo';
-import Staker from './Staker';
 import TemplateModule from './TemplateModule';
 // import Transfer from './Transfer';
 // import Upgrade from './Upgrade';
@@ -57,37 +56,34 @@ function Main() {
     <div ref={contextRef}>
       <Sticky context={contextRef}>
         <Grid centered columns={2}>
-          <Segment>
-            <Grid.Row>
-                <Image src={`${process.env.PUBLIC_URL}/assets/astar.png`} size='medium' />
-              <h1> dApps Staking Dashboard </h1>
-            </Grid.Row>
-          </Segment>
+          <Grid.Row>
+            <Image src={`${process.env.PUBLIC_URL}/assets/astar_dashboard.png`} size='huge' />
+          </Grid.Row>
         </Grid>
       </Sticky>
       <Divider />
       <Container>
-      <style>
-      {`
-      html, body {
-        background-color: #252839 !important;
-      }
-      p {
-        align-content: center;
-        background-color: #495285;
-        color: #fff;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        min-height: 6em;
-      }
-      p > span {
-        opacity: 0.4;
-        text-align: center;
-      }
-    }
-    `}
-    </style>
+        <style>
+          {`
+            html, body {
+              background-color: #252839 !important;
+            }
+            p {
+              align-content: center;
+              background-color: #495285;
+              color: #fff;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              min-height: 6em;
+            }
+            p > span {
+              opacity: 0.4;
+              text-align: center;
+            }
+          }
+          `}
+        </style>
         <Grid stackable columns='equal'>
           <Grid.Row stretched>
             <EraNumber />
@@ -110,7 +106,9 @@ function Main() {
           </Grid.Row>
           <Divider />
           <Grid.Row>
-            <DSInteractor accountPair={accountPair} />
+            <Segment raised>
+              <DSInteractor accountPair={accountPair} />
+            </Segment>
           </Grid.Row>
         </Grid>
       </Container>

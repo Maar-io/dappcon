@@ -183,24 +183,17 @@ function DisplayTable(props) {
   return <div style={{ overflowWrap: 'break-word' }}>
     <img alt='robots' src={`https://robohash.org/${props.contract}`} />
     <Table>
-      <Table.Header>
+    <Table.Header>
         <Table.Row>
           <Table.HeaderCell >Contract Address</Table.HeaderCell>
           <Table.HeaderCell >{props.contract}</Table.HeaderCell>
         </Table.Row>
+        <Table.Row>
+          <Table.HeaderCell >Developer's account:</Table.HeaderCell>
+          <Table.HeaderCell >{props.developer}</Table.HeaderCell>
+        </Table.Row>
       </Table.Header>
       <Table.Body>
-        <Table.Row>
-          <Table.Cell>Developer's account</Table.Cell>
-          <Table.Cell>
-            <Header as='h4' image>
-              <Image src={`https://robohash.org/${props.developer}`} size='mini' />
-              <Header.Content>
-                {props.developer}
-              </Header.Content>
-            </Header>
-          </Table.Cell>
-        </Table.Row>
         <Table.Row>
           <Table.Cell>
             <Header as='h2'>
@@ -221,6 +214,7 @@ function DisplayTable(props) {
           <Table.Cell>
             <Header as='h2'>
               <Header.Content>
+                <Icon name='user' />
                 {props.numStakers}
                 <Header.Subheader>Number of Stakers</Header.Subheader>
               </Header.Content>
@@ -261,45 +255,45 @@ function DisplayTable(props) {
 function DisplayAllTable(props) {
   console.log(props.contracts);
   return <div style={{ overflowWrap: 'break-word' }}>
-  <Table celled>
-    <Table.Header>
-      <Table.Row>
-        <Table.HeaderCell>Contract</Table.HeaderCell>
-        <Table.HeaderCell>Last Staked</Table.HeaderCell>
-      </Table.Row>
-    </Table.Header>
+    <Table celled>
+      <Table.Header>
+        <Table.Row>
+          <Table.HeaderCell>Contract</Table.HeaderCell>
+          <Table.HeaderCell>Last Staked</Table.HeaderCell>
+        </Table.Row>
+      </Table.Header>
 
-    <Table.Body>
-    {
-        props.contracts && props.contracts.map((contract) =>
-          <Table.Row
-            key={contract}>
-            <Table.Cell>{contract.key}</Table.Cell>
-            <Table.Cell>{contract.key}</Table.Cell>
-          </Table.Row>
-        )
-      }
-    </Table.Body>
+      <Table.Body>
+        {
+          props.contracts && props.contracts.map((contract) =>
+            <Table.Row
+              key={contract}>
+              <Table.Cell>{contract.key}</Table.Cell>
+              <Table.Cell>{contract.key}</Table.Cell>
+            </Table.Row>
+          )
+        }
+      </Table.Body>
 
-    <Table.Footer>
-      <Table.Row>
-        <Table.HeaderCell colSpan='3'>
-          <Menu floated='right' pagination>
-            <Menu.Item as='a' icon>
-              <Icon name='chevron left' />
-            </Menu.Item>
-            <Menu.Item as='a'>1</Menu.Item>
-            <Menu.Item as='a'>2</Menu.Item>
-            <Menu.Item as='a'>3</Menu.Item>
-            <Menu.Item as='a'>4</Menu.Item>
-            <Menu.Item as='a' icon>
-              <Icon name='chevron right' />
-            </Menu.Item>
-          </Menu>
-        </Table.HeaderCell>
-      </Table.Row>
-    </Table.Footer>
-  </Table>
+      <Table.Footer>
+        <Table.Row>
+          <Table.HeaderCell colSpan='3'>
+            <Menu floated='right' pagination>
+              <Menu.Item as='a' icon>
+                <Icon name='chevron left' />
+              </Menu.Item>
+              <Menu.Item as='a'>1</Menu.Item>
+              <Menu.Item as='a'>2</Menu.Item>
+              <Menu.Item as='a'>3</Menu.Item>
+              <Menu.Item as='a'>4</Menu.Item>
+              <Menu.Item as='a' icon>
+                <Icon name='chevron right' />
+              </Menu.Item>
+            </Menu>
+          </Table.HeaderCell>
+        </Table.Row>
+      </Table.Footer>
+    </Table>
   </div>
 }
 

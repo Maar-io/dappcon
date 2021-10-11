@@ -35,7 +35,7 @@ function Main(props) {
 
   return (
     <Grid.Column>
-      <Card>
+      <Card color='purple'>
         <Card.Content textAlign='center'>
           <Statistic
             label='Current Era'

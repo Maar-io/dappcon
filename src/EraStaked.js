@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Statistic, Grid, Card } from 'semantic-ui-react';
+import { Statistic, Grid, Card, Icon } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
 const DECIMALS = 1_000_000_000_000_000_000;
@@ -8,6 +8,7 @@ function Main (props) {
   const { api } = useSubstrate();
   const [era, setCurrentEra] = useState(0);
   const [stakedTotal, setStakedTotal] = useState(0);
+  const [rewards, setRewards] = useState(0);
 
   useEffect(() => {
     let unsubscribe;
@@ -23,10 +24,20 @@ function Main (props) {
         setStakedTotal(tvl);
       }
     })
-      .catch(console.error);
+    .catch(console.error);
 
+    api.query.dappsStaking.blockRewardAccumulator( (result) => {
+      if (result.isNone) {
+        setRewards('<None>');
+      } else {
+        const reward = parseInt(result / DECIMALS);
+        setRewards(reward);
+      }
+    })
+    .catch(console.error);
+    
     return () => unsubscribe && unsubscribe();
-  }, [api.query.dappsStaking, era]);
+  }, [api.query.dappsStaking.blockRewardAccumulator, era]);
 
   return (
     <Grid.Column>
@@ -38,7 +49,10 @@ function Main (props) {
           />
         </Card.Content>
         <Card.Content extra>
-         stake
+
+         upcoming rewards
+         <Icon name='hand point right outline' />
+         {rewards}
         </Card.Content>
       </Card>
     </Grid.Column>

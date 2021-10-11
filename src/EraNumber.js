@@ -1,41 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { Statistic, Grid, Card, Icon } from 'semantic-ui-react';
+import { Statistic, Grid, Card, Icon, Progress } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
 
-function Main (props) {
+function Main(props) {
   const { api } = useSubstrate();
-  // const { network } = props;
   const [era, setCurrentEra] = useState(0);
-  const [eraCountdown, setEraCountdown] = useState(0);
-  const blockPerEra = api.consts.dappsStaking.blockPerEra;
+  const [blockCountdown, setBlockCountdown] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  const blockPerEra = api.consts.dappsStaking.blockPerEra.toNumber();
   const currentEra = api.query.dappsStaking.currentEra;
-  const blockDuration = 2; // TODO duration per network
+  const bestNumber = api.derive.chain.bestNumber;
 
   useEffect(() => {
     let unsubscribeAll = null;
-    currentEra(number => {
-      setCurrentEra(number.toNumber());
-      setEraCountdown(blockPerEra.toNumber() * blockDuration);
+
+    bestNumber(number => {
+      setProgress((number % blockPerEra) / blockPerEra);
+      setBlockCountdown(blockPerEra - (number % blockPerEra));
     })
       .then(unsub => {
         unsubscribeAll = unsub;
       })
       .catch(console.error);
 
-    console.log('currentEra', currentEra);
-    console.log('blockPerEra', blockPerEra);
+    api.query.dappsStaking.currentEra(e => {
+      setCurrentEra(e.toNumber());
+    }).catch(console.error);
+
+
     return () => unsubscribeAll && unsubscribeAll();
-  }, [currentEra, blockPerEra]);
-
-  const countDown = () => {
-    setEraCountdown(time => time - 1);
-  };
-
-  useEffect(() => {
-    const id = setInterval(countDown, 1000);
-    return () => clearInterval(id);
-  }, []);
+  }, [currentEra, bestNumber]);
 
   return (
     <Grid.Column>
@@ -47,15 +43,16 @@ function Main (props) {
           />
         </Card.Content>
         <Card.Content extra>
-          Seconds until new era :
-          <Icon name='time' /> {eraCountdown}
+          <Progress percent={progress} indicating success/>
+          Blocks until new era :
+          <Icon name='time' /> {blockCountdown}
         </Card.Content>
       </Card>
     </Grid.Column>
   );
 }
 
-export default function CurrentEra (props) {
+export default function CurrentEra(props) {
   const { api } = useSubstrate();
   return api.query.dappsStaking.currentEra
     ? <Main {...props} />

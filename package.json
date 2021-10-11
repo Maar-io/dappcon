@@ -1,9 +1,10 @@
 {
   "name": "substrate-front-end-template",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
-  "author": "Parity Technologies <admin@parity.io>",
+  "author": "Mario Vukelic",
   "license": "Unlicense",
+  "homepage": "https://maar-io.github.io/dappcon/",
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
@@ -12,7 +13,8 @@
     "lint": "eslint src/**/*.js",
     "lint:ci": "eslint src/**/*.js --max-warnings=0",
     "lint:fix": "eslint --fix src/**/*.js",
-    "deploy": "gh-pages -d build -m '[ci skip] Updates'"
+    "predeploy": "yarn run build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@polkadot/api": "^6.1.2",
@@ -73,9 +75,8 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://substrate-developer-hub.github.io/substrate-front-end-template",
   "bugs": {
-    "url": "https://github.com/substrate-developer-hub/substrate-front-end-template/issues"
+    "url": "https://github.com/Maar-io/dappcon/issues"
   },
   "keywords": [
     "substrate",

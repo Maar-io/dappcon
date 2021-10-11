@@ -15,6 +15,7 @@ function Main(props) {
   const [totalStaked, setTotalStaked] = useState(0);
   const [claimedRewards, setClaimedRewards] = useState(0);
   const [numStakers, setNumStakers] = useState(0);
+  const [previousStaked, setPreviousStaked] = useState(0);
   const [stakers, setStakers] = useState([]);
 
   const getAddressEnum = (address) => (
@@ -96,6 +97,7 @@ function Main(props) {
         console.log('queryContractEraStake total', result.unwrap().total.toHuman());
         setClaimedRewards(result.unwrap().claimed_rewards.toHuman());
         console.log('queryContractEraStake total', result.unwrap().claimed_rewards.toHuman());
+        setPreviousStaked(result.unwrap().former_staked_era.toString());
         setNumStakers(result.unwrap().stakers.size);
         console.log('queryContractEraStake total', result.unwrap().stakers.size);
         // const s = result.unwrap().stakers.map(entry => ({ account: entry, staked: entry}));
@@ -153,6 +155,7 @@ function Main(props) {
           totalStaked={totalStaked}
           claimedRewards={claimedRewards}
           contract={selectedContract}
+          previousStaked={previousStaked}
         />
         {/* <DisplayAllTable
           contracts = {callables}
@@ -241,8 +244,8 @@ function DisplayTable(props) {
           <Table.Cell>
             <Header as='h2'>
               <Header.Content>
-                ?
-                <Header.Subheader>TBA</Header.Subheader>
+                {props.previousStaked}
+                <Header.Subheader>Previously staked era</Header.Subheader>
               </Header.Content>
             </Header>
           </Table.Cell>

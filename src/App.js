@@ -56,9 +56,7 @@ function Main() {
     <div ref={contextRef}>
       <Sticky context={contextRef}>
         <Grid centered columns={2}>
-          <Grid.Row>
-            <Image src={`${process.env.PUBLIC_URL}/assets/astar_dashboard.png`} size='huge' />
-          </Grid.Row>
+
         </Grid>
       </Sticky>
       <Divider />
@@ -85,6 +83,9 @@ function Main() {
           `}
         </style>
         <Grid stackable columns='equal'>
+        <Grid.Row>
+            <Image src={`${process.env.PUBLIC_URL}/assets/astar_dashboard.png`} size='huge' />
+          </Grid.Row>
           <Grid.Row stretched>
             <EraNumber />
             <DappsCount />

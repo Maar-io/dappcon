@@ -17,7 +17,7 @@ function Main(props) {
     let unsubscribeAll = null;
 
     bestNumber(number => {
-      setProgress((number % blockPerEra) / blockPerEra);
+      setProgress((number % blockPerEra) / blockPerEra * 100);
       setBlockCountdown(blockPerEra - (number % blockPerEra));
     })
       .then(unsub => {

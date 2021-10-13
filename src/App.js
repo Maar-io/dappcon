@@ -1,5 +1,5 @@
 import React, { useState, createRef } from 'react';
-import { Container, Dimmer, Loader, Grid, Sticky, Message, Segment, Rail, Image, Divider } from 'semantic-ui-react';
+import { Container, Dimmer, Loader, Grid, Sticky, Message, Segment, Image, Divider } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 
 import { SubstrateContextProvider, useSubstrate } from './substrate-lib';
@@ -16,7 +16,7 @@ import DSInteractor from './DSInteractor';
 import DappsCount from './DappsCount';
 // import Metadata from './Metadata';
 import NodeInfo from './NodeInfo';
-import TemplateModule from './TemplateModule';
+import Constants from './Constants';
 import Network from './Network';
 // import Transfer from './Transfer';
 // import Upgrade from './Upgrade';
@@ -84,7 +84,7 @@ function Main() {
           `}
         </style>
         <Grid stackable columns='equal'>
-        <Grid.Row>
+          <Grid.Row>
             <Image src={`${process.env.PUBLIC_URL}/assets/astar_dashboard.png`} size='huge' />
             <Network />
           </Grid.Row>
@@ -93,6 +93,10 @@ function Main() {
             <DappsCount />
             <EraStaked />
             <NodeInfo />
+          </Grid.Row>
+          <Divider />
+          <Grid.Row>
+            <Constants />
           </Grid.Row>
           <Divider />
           {/* <Grid.Row stretched>

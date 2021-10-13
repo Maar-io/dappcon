@@ -17,6 +17,7 @@ import DappsCount from './DappsCount';
 // import Metadata from './Metadata';
 import NodeInfo from './NodeInfo';
 import TemplateModule from './TemplateModule';
+import Network from './Network';
 // import Transfer from './Transfer';
 // import Upgrade from './Upgrade';
 
@@ -85,6 +86,7 @@ function Main() {
         <Grid stackable columns='equal'>
         <Grid.Row>
             <Image src={`${process.env.PUBLIC_URL}/assets/astar_dashboard.png`} size='huge' />
+            <Network />
           </Grid.Row>
           <Grid.Row stretched>
             <EraNumber />

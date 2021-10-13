@@ -1,21 +1,21 @@
 {
   "files": {
-    "main.js": "/dappcon/static/js/main.15bdec55.chunk.js",
-    "main.js.map": "/dappcon/static/js/main.15bdec55.chunk.js.map",
+    "main.js": "/dappcon/static/js/main.ec47cdb4.chunk.js",
+    "main.js.map": "/dappcon/static/js/main.ec47cdb4.chunk.js.map",
     "runtime-main.js": "/dappcon/static/js/runtime-main.96bb2761.js",
     "runtime-main.js.map": "/dappcon/static/js/runtime-main.96bb2761.js.map",
     "static/css/2.9c0378b8.chunk.css": "/dappcon/static/css/2.9c0378b8.chunk.css",
-    "static/js/2.9d0f34f0.chunk.js": "/dappcon/static/js/2.9d0f34f0.chunk.js",
-    "static/js/2.9d0f34f0.chunk.js.map": "/dappcon/static/js/2.9d0f34f0.chunk.js.map",
+    "static/js/2.4e95f6f9.chunk.js": "/dappcon/static/js/2.4e95f6f9.chunk.js",
+    "static/js/2.4e95f6f9.chunk.js.map": "/dappcon/static/js/2.4e95f6f9.chunk.js.map",
     "index.html": "/dappcon/index.html",
     "static/css/2.9c0378b8.chunk.css.map": "/dappcon/static/css/2.9c0378b8.chunk.css.map",
-    "static/js/2.9d0f34f0.chunk.js.LICENSE.txt": "/dappcon/static/js/2.9d0f34f0.chunk.js.LICENSE.txt",
+    "static/js/2.4e95f6f9.chunk.js.LICENSE.txt": "/dappcon/static/js/2.4e95f6f9.chunk.js.LICENSE.txt",
     "static/media/semantic.min.css": "/dappcon/static/media/outline-icons.ddae9b1b.woff"
   },
   "entrypoints": [
     "static/js/runtime-main.96bb2761.js",
     "static/css/2.9c0378b8.chunk.css",
-    "static/js/2.9d0f34f0.chunk.js",
-    "static/js/main.15bdec55.chunk.js"
+    "static/js/2.4e95f6f9.chunk.js",
+    "static/js/main.ec47cdb4.chunk.js"
   ]
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import queryString from 'query-string';
+import config from './config';
 
 import {
   Dropdown,
   Container
 } from 'semantic-ui-react';
-
-import { useSubstrate } from './substrate-lib';
 
 function Main (props) {
   const [networkSelected, setNetworkSelected] = useState('');
@@ -23,16 +23,18 @@ function Main (props) {
       }
     ];
 
-  const initialNetwork =
-    networkOptions.length > 0 ? networkOptions[0].name : '';
-
   // Set the initial address
   useEffect(() => {
-    console.log('useEffect selected Network', networkSelected);
-  }, [networkSelected, initialNetwork]);
+    const parsedQuery = queryString.parseUrl(window.location.search);
+    setNetworkSelected(parsedQuery.query.rpc || config.PROVIDER_SOCKET);
+  }, []);
 
   const onChange = network => {
     setNetworkSelected(network);
+
+    const parsedQuery = queryString.parseUrl(window.location.search);
+    parsedQuery.query.rpc = network;
+    window.location = queryString.stringifyUrl(parsedQuery);
   };
 
   return (
@@ -53,6 +55,5 @@ function Main (props) {
 }
 
 export default function Network (props) {
-  const { api } = useSubstrate();
-  return api.query ? <Main {...props} /> : null;
+  return <Main {...props} />;
 }

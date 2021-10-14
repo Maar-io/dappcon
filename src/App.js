@@ -11,18 +11,18 @@ import ContractExplorer from './ContractExplorer';
 import EraStaked from './EraStaked';
 // import BlockNumber from './BlockNumber';
 import EraNumber from './EraNumber';
-import Events from './Events';
 import DSInteractor from './DSInteractor';
 import DappsCount from './DappsCount';
 // import Metadata from './Metadata';
 import NodeInfo from './NodeInfo';
 import Constants from './Constants';
 import Network from './Network';
+
 // import Transfer from './Transfer';
 // import Upgrade from './Upgrade';
 
-function Main() {
-  const [accountAddress, setAccountAddress] = useState(null);
+function Main () {
+  const [accountAddress] = useState(null);
   const { apiState, keyring, keyringState, apiError } = useSubstrate();
   const accountPair =
     accountAddress &&
@@ -41,6 +41,9 @@ function Main() {
           header='Error Connecting to Substrate'
           content={`${JSON.stringify(err, null, 4)}`}
         />
+      </Grid.Column>
+      <Grid.Column>
+        <Network />
       </Grid.Column>
     </Grid>;
 
@@ -124,7 +127,7 @@ function Main() {
   );
 }
 
-export default function App() {
+export default function App () {
   return (
     <SubstrateContextProvider>
       <Main />

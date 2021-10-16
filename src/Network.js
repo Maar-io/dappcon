@@ -13,7 +13,7 @@ function Main (props) {
   const networkOptions =
     [
       {
-        key: 'Shiden', text: 'Shiden (mainnet)', value: 'wss://rpc.shiden.astar.network'
+        key: 'Shiden', text: 'Shiden (mainnet)', value: 'wss://shiden.api.onfinality.io/public-ws'
       },
       {
         key: 'Shibuya', text: 'Shibuya (testnet)', value: 'wss://rpc.shibuya.astar.network'

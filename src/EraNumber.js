@@ -3,14 +3,13 @@ import { Statistic, Grid, Card, Icon, Progress } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
 
-function Main(props) {
+function Main (props) {
   const { api } = useSubstrate();
   const [era, setCurrentEra] = useState(0);
   const [blockCountdown, setBlockCountdown] = useState(0);
   const [progress, setProgress] = useState(0);
 
   const blockPerEra = api.consts.dappsStaking.blockPerEra.toNumber();
-  const currentEra = api.query.dappsStaking.currentEra;
   const bestNumber = api.derive.chain.bestNumber;
 
   useEffect(() => {
@@ -29,9 +28,8 @@ function Main(props) {
       setCurrentEra(e.toNumber());
     }).catch(console.error);
 
-
     return () => unsubscribeAll && unsubscribeAll();
-  }, [currentEra, bestNumber]);
+  }, [bestNumber, blockPerEra, api.query.dappsStaking]);
 
   return (
     <Grid.Column>
@@ -43,7 +41,7 @@ function Main(props) {
           />
         </Card.Content>
         <Card.Content extra>
-          <Progress percent={progress} indicating success/>
+          <Progress percent={progress} indicating success />
           Blocks until new era :
           <Icon name='time' /> {blockCountdown}
         </Card.Content>
@@ -52,7 +50,7 @@ function Main(props) {
   );
 }
 
-export default function CurrentEra(props) {
+export default function EraNumber (props) {
   const { api } = useSubstrate();
   return api.query.dappsStaking.currentEra
     ? <Main {...props} />

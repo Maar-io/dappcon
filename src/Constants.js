@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Icon, Step } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
-  
-function Main(props) {
+
+function Main (props) {
   const { api } = useSubstrate();
   const [blocksPerEra, setBlocksPerEra] = useState(0);
   const [maxStakers, setMaxStakers] = useState(0);
@@ -59,7 +59,7 @@ function Main(props) {
   );
 }
 
-export default function Constants(props) {
+export default function Constants (props) {
   const { api } = useSubstrate();
   return api.consts
     ? <Main {...props} />

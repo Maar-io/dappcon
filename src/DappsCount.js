@@ -9,19 +9,15 @@ function Main (props) {
   const [preApproval, setPreApproval] = useState('unknown');
 
   useEffect(() => {
-    let unsubscribe;
     api.query.dappsStaking.preApprovalIsEnabled((result) => {
       setPreApproval(result.toString());
     });
 
-    unsubscribe = api.query.dappsStaking.registeredDapps.keys().then(
+    api.query.dappsStaking.registeredDapps.keys().then(
       result => {
         setDappsCount(result.length);
       }
-    )
-      .catch(console.error);
-
-    return () => unsubscribe;
+    ).catch(console.error);
   }, [api.query.dappsStaking, api.query.dappsStaking.registeredDapps]);
 
   return (

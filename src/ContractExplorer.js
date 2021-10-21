@@ -1,33 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { Grid, Form, Dropdown, Table, Header, Menu, Icon, Divider } from 'semantic-ui-react';
-import { useSubstrate, utils } from './substrate-lib';
-// import getEraStakes from './utils';
+import { Grid, Form, Dropdown, Table, Header, Icon } from 'semantic-ui-react';
+import { useSubstrate } from './substrate-lib';
 const DECIMALS = 1_000_000_000_000_000_000;
 
-
-function Main(props) {
+function Main (props) {
   const { api } = useSubstrate();
   const [contracts, setContracts] = useState([]);
   const [selectedContract, setSelectedContract] = useState(0);
-  const [lastClaimed, setLastClaimed] = useState(0);
+  const [oldestToClaim, setOldestToClaim] = useState(0);
   const [lastStaked, setLastStaked] = useState(0);
   const [formState, setFormState] = useState(0);
   const [developer, setDeveloper] = useState(0);
   const [totalStaked, setTotalStaked] = useState(0);
   const [claimedRewards, setClaimedRewards] = useState(0);
   const [numStakers, setNumStakers] = useState(0);
-  const [previousStaked, setPreviousStaked] = useState(0);
+  const [erasToClaim, setErasToClaim] = useState(0);
 
   const getAddressEnum = (address) => (
-    { 'Evm': address }
+    { Evm: address }
   );
 
   const fetchContracts = () => {
     api.query.dappsStaking.registeredDapps.keys().then(
       result => {
-        console.log('registeredDapps result', result);
-        const r = result.map(c => '0x' + c.toString().slice(-40))
-        console.log(r);
+        // console.log('registeredDapps result', result);
+        const r = result.map(c => '0x' + c.toString().slice(-40));
+        // console.log(r);
         const contractList = r.map(c => ({ key: c, value: c, text: c }));
         console.log('fetchContracts', contractList);
         setContracts(contractList);
@@ -39,14 +37,15 @@ function Main(props) {
   const resetContractInfo = () => {
     setDeveloper(0);
     setLastStaked(0);
-    setLastClaimed(0);
+    setOldestToClaim(0);
     setNumStakers('?');
     setTotalStaked(0);
     setClaimedRewards('?');
+    setErasToClaim(0);
   };
 
   const onContractChange = (_, data) => {
-    resetContractInfo()
+    resetContractInfo();
     console.log('onContractChange value', data.value);
     setSelectedContract(data.value);
     setFormState(data.value);
@@ -61,17 +60,17 @@ function Main(props) {
       setDeveloper(res);
     })
       .catch(console.error);
-  }
-  
+  };
+
   const queryEraStakeMap = () => {
     const getInfo = async () => {
-      let eraStakeMap = new Map();
+      const eraStakeMap = new Map();
 
       try {
         const [eraMap] = await Promise.all([
           api.query.dappsStaking.contractEraStake.entries(
             getAddressEnum(selectedContract)
-          ),
+          )
         ]);
         // console.log('contractEraStake.entries ', eraMap);
         eraMap.forEach(([key, points]) => {
@@ -87,12 +86,12 @@ function Main(props) {
           const lastStaked = Math.max(...eraStakeMap.keys());
           console.log('queryEraStakeMap lastStaked', lastStaked);
           setLastStaked(lastStaked);
-          
+
           // number of stakers
           const entry = eraStakeMap.get(lastStaked);
           const stakerNum = Object.keys(entry.stakers).length;
           console.log('queryEraStakeMap stakerNum', stakerNum);
-          setNumStakers(stakerNum)
+          setNumStakers(stakerNum);
 
           // total staked on the contract
           const total = parseInt(entry.total / DECIMALS);
@@ -103,8 +102,17 @@ function Main(props) {
           const rewards = parseInt(entry.claimed_rewards / DECIMALS);
           console.log('queryEraStakeMap claimed_rewards', rewards);
           setClaimedRewards(rewards);
-        }
 
+          // oldest era to Claim
+          api.query.dappsStaking.currentEra(currentEra => {
+            const historyDepth = parseInt(api.consts.dappsStaking.historyDepth.toString());
+            const firstStakedEra = Math.min(...eraStakeMap.keys());
+            const oldest = Math.max(firstStakedEra, Math.max(1, currentEra - historyDepth));
+            console.log('queryEraStakeMap oldest', oldest);
+            setOldestToClaim(oldest);
+            setErasToClaim(currentEra - oldest);
+          }).catch(console.error);
+        }
       } catch (e) {
         console.error(e);
       }
@@ -113,8 +121,8 @@ function Main(props) {
   };
 
   useEffect(fetchContracts, [api.query.dappsStaking]);
-  useEffect(queryDeveloper, [selectedContract]);
-  useEffect(queryEraStakeMap, [selectedContract]);
+  useEffect(queryDeveloper, [api.query.dappsStaking, selectedContract]);
+  useEffect(queryEraStakeMap, [api.query.dappsStaking, api.consts.dappsStaking.historyDepth, selectedContract]);
 
   return (
     <Grid.Column width={8}>
@@ -135,23 +143,20 @@ function Main(props) {
         <DisplayTable
           developer={developer}
           numStakers={numStakers}
-          lastClaimed={lastClaimed}
+          oldestToClaim={oldestToClaim}
           lastStaked={lastStaked}
           totalStaked={totalStaked}
           claimedRewards={claimedRewards}
           contract={selectedContract}
-          previousStaked={previousStaked}
+          erasToClaim={erasToClaim}
         />
-        {/* <Stakers 
-          contract={selectedContract}
-        /> */}
       </Form>
     </Grid.Column>
 
   );
 }
 
-function DisplayTable(props) {
+function DisplayTable (props) {
   return <div style={{ overflowWrap: 'break-word' }}>
     <img alt='robots' src={`https://robohash.org/${props.contract}`} />
     <Table>
@@ -178,7 +183,7 @@ function DisplayTable(props) {
           <Table.Cell >
             <Header as='h2'>
               <Header.Content>
-                {props.lastClaimed}
+                {props.oldestToClaim}
                 <Header.Subheader>Contract Last Claimed</Header.Subheader>
               </Header.Content>
             </Header>
@@ -210,21 +215,21 @@ function DisplayTable(props) {
               </Header.Content>
             </Header>
           </Table.Cell>
-          {/* <Table.Cell>
+          <Table.Cell>
             <Header as='h2'>
               <Header.Content>
-                {props.previousStaked}
-                <Header.Subheader>Previously staked era</Header.Subheader>
+                {props.erasToClaim}
+                <Header.Subheader>Unclaimed eras</Header.Subheader>
               </Header.Content>
             </Header>
-          </Table.Cell> */}
+          </Table.Cell>
         </Table.Row>
       </Table.Body>
     </Table>
-  </div>
+  </div>;
 }
 
-export default function ContractExplorer(props) {
+export default function ContractExplorer (props) {
   const { api } = useSubstrate();
   return api ? <Main {...props} /> : null;
 }

@@ -17,7 +17,7 @@ import DappsCount from './DappsCount';
 import NodeInfo from './NodeInfo';
 import Constants from './Constants';
 import Network from './Network';
-import AllContracts from './AllContracts';
+// import AllContracts from './AllContracts';
 
 // import Transfer from './Transfer';
 // import Upgrade from './Upgrade';

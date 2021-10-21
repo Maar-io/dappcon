@@ -9,25 +9,4 @@ const utils = {
   }
 };
 
-const getAddressEnum = (address) => (
-  { 'Evm': address }
-);
-
-const getEraStakes = (
-  contractAddress
-) => {
-  let eraStakeMap = new Map();
-
-  api.query.dappsStaking.contractEraStake.entries(
-    getAddressEnum(contractAddress)
-  ).then(eraStakes => {
-    eraStakes.forEach(([key, stake]) => {
-      console.log('[key, stake] = ', key, stake)
-      eraStakeMap.set(parseInt(key.args.map((k) => k.toString())[1]), stake);
-    });
-    console.log('getEraStakes eraStakeMap', eraStakeMap);
-    return eraStakeMap;
-  });
-};
-
-export default { utils, getEraStakes };
+export default utils;

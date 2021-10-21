@@ -13,7 +13,7 @@ function Main (props) {
   const [status, setStatus] = useState(null);
 
   const [interxType, setInterxType] = useState('QUERY');
-  const [palletRPCs, setPalletRPCs] = useState([{key: 'dappsStaking', value: 'dappsStaking', text: 'dappsStaking'}]);
+  const [palletRPCs] = useState([{ key: 'dappsStaking', value: 'dappsStaking', text: 'dappsStaking' }]);
   const [callables, setCallables] = useState([]);
   const [paramFields, setParamFields] = useState([]);
 
@@ -37,12 +37,12 @@ function Main (props) {
       return api.consts;
     }
   };
-  
+
   const updateCallables = () => {
     if (!api || palletRpc === '') { return; }
     const callables = Object.keys(getApiType(api, interxType)[palletRpc]).sort()
-    .map(c => ({ key: c, value: c, text: c }));
-    console.log("updateCallables", callables);
+      .map(c => ({ key: c, value: c, text: c }));
+    // console.log('updateCallables', callables);
     setCallables(callables);
   };
 
@@ -217,15 +217,15 @@ function Main (props) {
               type='text'
               label={paramField.name}
               state={{ ind, paramField }}
-              value={ inputParams[ind] ? inputParams[ind].value : '' }
+              value={inputParams[ind] ? inputParams[ind].value : ''}
               onChange={onPalletCallableParamChange}
             />
-            { paramField.optional
+            {paramField.optional
               ? <Label
                 basic
                 pointing
                 color='teal'
-                content = { getOptionalMsg(interxType) }
+                content={getOptionalMsg(interxType)}
               />
               : null
             }
@@ -250,18 +250,18 @@ function InteractorSubmit (props) {
     console.log('TxButton InteractorSubmit props = ', props);
 
     return <TxButton
-      label = 'Query'
-      type = 'QUERY'
-      color = 'blue'
+      label='Query'
+      type='QUERY'
+      color='blue'
       {...props}
     />;
   } else if (interxType === 'EXTRINSIC') {
     return <TxGroupButton {...props} />;
   } else if (interxType === 'RPC' || interxType === 'CONSTANT') {
     return <TxButton
-      label = 'Submit'
-      type = {interxType}
-      color = 'blue'
+      label='Submit'
+      type={interxType}
+      color='blue'
       {...props}
     />;
   }

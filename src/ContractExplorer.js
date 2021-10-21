@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Grid, Form, Dropdown, Table, Header, Menu, Icon, Divider } from 'semantic-ui-react';
 import { useSubstrate, utils } from './substrate-lib';
 // import getEraStakes from './utils';
+const DECIMALS = 1_000_000_000_000_000_000;
 
 
 function Main(props) {
   const { api } = useSubstrate();
-  const [callables, setCallables] = useState([]);
+  const [contracts, setContracts] = useState([]);
   const [selectedContract, setSelectedContract] = useState(0);
   const [lastClaimed, setLastClaimed] = useState(0);
   const [lastStaked, setLastStaked] = useState(0);
@@ -16,21 +17,20 @@ function Main(props) {
   const [claimedRewards, setClaimedRewards] = useState(0);
   const [numStakers, setNumStakers] = useState(0);
   const [previousStaked, setPreviousStaked] = useState(0);
-  const [eraStakeMap, setEraStakeMap] = useState(0);
 
   const getAddressEnum = (address) => (
     { 'Evm': address }
   );
 
-  const updateCallables = () => {
+  const fetchContracts = () => {
     api.query.dappsStaking.registeredDapps.keys().then(
       result => {
         console.log('registeredDapps result', result);
         const r = result.map(c => '0x' + c.toString().slice(-40))
         console.log(r);
-        const callables = r.map(c => ({ key: c, value: c, text: c }));
-        console.log('updateCallables callables', callables);
-        setCallables(callables);
+        const contractList = r.map(c => ({ key: c, value: c, text: c }));
+        console.log('fetchContracts', contractList);
+        setContracts(contractList);
       }
     )
       .catch(console.error);
@@ -41,6 +41,7 @@ function Main(props) {
     setLastStaked(0);
     setLastClaimed(0);
     setNumStakers('?');
+    setTotalStaked(0);
     setClaimedRewards('?');
   };
 
@@ -49,31 +50,6 @@ function Main(props) {
     console.log('onContractChange value', data.value);
     setSelectedContract(data.value);
     setFormState(data.value);
-  };
-
-  // const queryLastClaimed = () => {
-  //   let res;
-  //   api.query.dappsStaking.contractLastClaimed(getAddressEnum(selectedContract), result => {
-  //     result.isNone ? res = 'never' : res = result.unwrap().toHuman();
-  //     console.log('queryLastClaimed res', res);
-  //     setLastClaimed(res);
-  //   })
-  //     .catch(console.error);
-  // }
-
-  const getContractLastStakedEra = () => {
-    let eraIndex;
-
-    // eraIndex = Math.max(...eraStakeMap.keys());
-    console.log('getContractLastStakedEra eraStakeMap', eraStakeMap);
-    // setLastStaked(eraIndex);
-
-    // if (eraStakeMap.len) {
-    // }
-    // else{
-    //   console.log('getContractLastStakedEra undefined');
-
-    // }
   };
 
   const queryDeveloper = () => {
@@ -86,84 +62,59 @@ function Main(props) {
     })
       .catch(console.error);
   }
-
-  const queryContractEraStake = () => {
-    console.log('queryContractEraStake selectedContract is', selectedContract, "last staked", lastStaked);
-    api.query.dappsStaking.contractEraStake(getAddressEnum(selectedContract), lastStaked, result => {
-      if (result.isNone) {
-        console.log('queryContractEraStake result.isNone');
-        setTotalStaked(0);
-        setClaimedRewards(0);
-        setNumStakers(0);
-      }
-      else {
-        console.log('queryContractEraStake res', result.unwrap().toHuman());
-        setTotalStaked(result.unwrap().total.toHuman());
-        console.log('queryContractEraStake total', result.unwrap().total.toHuman());
-        setClaimedRewards(result.unwrap().claimed_rewards.toHuman());
-        console.log('queryContractEraStake total', result.unwrap().claimed_rewards.toHuman());
-        setPreviousStaked(result.unwrap().former_staked_era.toString());
-        setNumStakers(result.unwrap().stakers.size);
-        console.log('queryContractEraStake total', result.unwrap().stakers.size);
-
-        setLastStaked(res)
-
-        // const s = result.unwrap().stakers.map(entry => ({ account: entry, staked: entry}));
-        // let stakerList;
-        // stakerList = Object.entries(result.unwrap().stakers.toHuman()).map((key, value) =>({account: key, staked: value}) )
-        // for (const [key, value] of Object.entries(result.unwrap().stakers.toHuman())) {
-        //   stakerList[key] = value;
-        // }
-        // setStakers(stakerList)
-        // console.log('queryContractEraStake stakers', stakerList);
-
-        //setStakers(result.unwrap().stakers);
-      };
-    })
-      .catch(console.error);
-  }
-
   
   const queryEraStakeMap = () => {
     const getInfo = async () => {
-      let contractEraStakeEntries = new Map();
+      let eraStakeMap = new Map();
 
       try {
         const [eraMap] = await Promise.all([
-          api.query.dappsStaking.c(
+          api.query.dappsStaking.contractEraStake.entries(
             getAddressEnum(selectedContract)
           ),
         ]);
-        console.log('contractEraStake.entries ', eraMap);
-        eraMap.forEach(([key, stake]) => {
-          console.log('[key, stake] = ', key, stake)
-          eraStakeMap.set(parseInt(key.args.map((k) => k.toString())[1]), stake);
+        // console.log('contractEraStake.entries ', eraMap);
+        eraMap.forEach(([key, points]) => {
+          // console.log('[key, points] = ', key, points);
+          const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
+          // console.log('eraKey', eraKey);
+          eraStakeMap.set(eraKey, points.toJSON());
         });
+
         console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
-        const eraIndex = Math.max(...eraStakeMap.keys());
-        setLastStaked(eraIndex);
+        if (eraStakeMap.size !== 0) {
+          // contract last staked
+          const lastStaked = Math.max(...eraStakeMap.keys());
+          console.log('queryEraStakeMap lastStaked', lastStaked);
+          setLastStaked(lastStaked);
+          
+          // number of stakers
+          const entry = eraStakeMap.get(lastStaked);
+          const stakerNum = Object.keys(entry.stakers).length;
+          console.log('queryEraStakeMap stakerNum', stakerNum);
+          setNumStakers(stakerNum)
+
+          // total staked on the contract
+          const total = parseInt(entry.total / DECIMALS);
+          console.log('queryEraStakeMap total', total);
+          setTotalStaked(total);
+
+          // total rewards on the contract
+          const rewards = parseInt(entry.claimed_rewards / DECIMALS);
+          console.log('queryEraStakeMap claimed_rewards', rewards);
+          setClaimedRewards(rewards);
+        }
+
       } catch (e) {
         console.error(e);
       }
     };
-    contractEraStakeEntries();
-
-    // console.log('queryEraStakeMap selectedContract is', selectedContract);
-    // utils.getEraStakes(selectedContract).then(eraStakeMap => {
-    //   setEraStakeMap(eraStakes);
-    // }
-    // );
+    getInfo();
   };
 
-  const doQueryContractInfo = () => {
-    queryDeveloper();
-    queryContractEraStake();
-  }
-
-  useEffect(updateCallables, [api.query.dappsStaking]);
+  useEffect(fetchContracts, [api.query.dappsStaking]);
+  useEffect(queryDeveloper, [selectedContract]);
   useEffect(queryEraStakeMap, [selectedContract]);
-  useEffect(getContractLastStakedEra, [eraStakeMap]);
-  // useEffect(doQueryContractInfo, [lastStaked]);
 
   return (
     <Grid.Column width={8}>
@@ -178,7 +129,7 @@ function Main(props) {
             search
             selection
             value={formState}
-            options={callables}
+            options={contracts}
           />
         </Form.Field>
         <DisplayTable
@@ -199,20 +150,6 @@ function Main(props) {
 
   );
 }
-
-// function DisplayPlain(props) {
-//   return <div style={{ overflowWrap: 'break-word' }}>
-//     <img alt='robots' src={`https://robohash.org/${props.contract}`} />
-//     <h3> contract = {props.contract} </h3>
-//     <h3> developer = {props.developer} </h3>
-//     <h3> lastClaimed = {props.lastClaimed} </h3>
-//     <h3> lastStaked = {props.lastStaked} </h3>
-//     <h3> totalStaked = {props.totalStaked} </h3>
-//     <h3> claimed rewards = {props.claimedRewards} </h3>
-//     <h3> number of stakers = {props.numStakers} </h3>
-//     {/* <h3> stakers = {stakers} </h3> */}
-//   </div>
-// }
 
 function DisplayTable(props) {
   return <div style={{ overflowWrap: 'break-word' }}>
@@ -273,14 +210,14 @@ function DisplayTable(props) {
               </Header.Content>
             </Header>
           </Table.Cell>
-          <Table.Cell>
+          {/* <Table.Cell>
             <Header as='h2'>
               <Header.Content>
                 {props.previousStaked}
                 <Header.Subheader>Previously staked era</Header.Subheader>
               </Header.Content>
             </Header>
-          </Table.Cell>
+          </Table.Cell> */}
         </Table.Row>
       </Table.Body>
     </Table>

@@ -35,7 +35,7 @@ function Main (props) {
               getAddressEnum(selectedContract)
             )
           ]);
-          console.log('contractEraStake.entries ', eraMap);
+          // console.log('contractEraStake.entries ', eraMap);
           eraMap.forEach(([key, points]) => {
             // console.log('[key, points] = ', key, points);
             const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
@@ -43,7 +43,7 @@ function Main (props) {
             eraStakeMap.set(eraKey, points.toJSON());
           });
 
-          console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
+          // console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
           if (eraStakeMap.size !== 0) {
             // number of stakers
             const lastStaked = Math.max(...eraStakeMap.keys());

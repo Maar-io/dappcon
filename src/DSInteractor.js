@@ -55,22 +55,22 @@ function Main (props) {
     let paramFields = [];
 
     if (interxType === 'QUERY') {
-      console.log('interxType QUERY');
+      // console.log('interxType QUERY');
 
       const metaType = api.query[palletRpc][callable].meta.type;
-      console.log('metaType = ', metaType);
+      // console.log('metaType = ', metaType);
       if (metaType.isPlain) {
         // Do nothing as `paramFields` is already set to []
       } else if (metaType.isMap) {
-        console.log('metaType isMap');
+        // console.log('metaType isMap');
         paramFields = [{
           name: metaType.asMap.key.toString(),
           type: metaType.asMap.key.toString(),
           optional: false
         }];
-        console.log('paramFields = ', paramFields);
+        // console.log('paramFields = ', paramFields);
       } else if (metaType.isDoubleMap) {
-        console.log('metaType isDoubleMap');
+        // console.log('metaType isDoubleMap');
         paramFields = [{
           name: metaType.asDoubleMap.key1.toString(),
           type: metaType.asDoubleMap.key1.toString(),
@@ -80,10 +80,10 @@ function Main (props) {
           type: metaType.asDoubleMap.key2.toString(),
           optional: false
         }];
-        console.log('paramFields = ', paramFields);
+        // console.log('paramFields = ', paramFields);
       }
     } else if (interxType === 'EXTRINSIC') {
-      console.log('interxType EXTRINSIC');
+      // console.log('interxType EXTRINSIC');
 
       const metaArgs = api.tx[palletRpc][callable].meta.args;
 
@@ -247,7 +247,7 @@ function Main (props) {
 function InteractorSubmit (props) {
   const { attrs: { interxType } } = props;
   if (interxType === 'QUERY') {
-    console.log('TxButton InteractorSubmit props = ', props);
+    // console.log('TxButton InteractorSubmit props = ', props);
 
     return <TxButton
       label='Query'

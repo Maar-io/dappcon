@@ -106,9 +106,22 @@ function Main (props) {
           // oldest era to Claim
           api.query.dappsStaking.currentEra(currentEra => {
             const historyDepth = parseInt(api.consts.dappsStaking.historyDepth.toString());
-            const firstStakedEra = Math.min(...eraStakeMap.keys());
-            const oldest = Math.max(firstStakedEra, Math.max(1, currentEra - historyDepth));
-            console.log('queryEraStakeMap oldest', oldest);
+            let firstStakedEra = Math.min(...eraStakeMap.keys());
+            firstStakedEra = Math.max(firstStakedEra, Math.max(1, currentEra - historyDepth));
+            let oldest = firstStakedEra;
+            for (let era = firstStakedEra; era <= currentEra; era++) {
+              const mapEntry = eraStakeMap.get(era);
+              if (typeof (mapEntry) !== 'undefined') {
+                const claimed = parseInt(mapEntry.claimed_rewards / DECIMALS);
+                setClaimedRewards(r => r + claimed);
+                // console.log('claimedRewards = ', era, claimed);
+                if (claimed === 0) {
+                  // console.log('oldest = ', era);
+                  oldest = era;
+                  break;
+                }
+              }
+            }
             setOldestToClaim(oldest);
             setErasToClaim(currentEra - oldest);
           }).catch(console.error);
@@ -184,7 +197,7 @@ function DisplayTable (props) {
             <Header as='h2'>
               <Header.Content>
                 {props.oldestToClaim}
-                <Header.Subheader>Contract Last Claimed</Header.Subheader>
+                <Header.Subheader>Last Time Claimed</Header.Subheader>
               </Header.Content>
             </Header>
           </Table.Cell>

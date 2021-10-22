@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Statistic, Grid, Card } from 'semantic-ui-react';
-
+import { Grid, Card, Statistic } from 'semantic-ui-react';
 import { useSubstrate } from './substrate-lib';
 
 function Main (props) {
   const { api } = useSubstrate();
-  const [dappsCount, setDappsCount] = useState(0);
   const [contracts, setContracts] = useState([]);
   const [numStakers, setNumStakers] = useState(0);
+
   const getAddressEnum = (address) => (
     { Evm: address }
   );
@@ -15,8 +14,12 @@ function Main (props) {
   const fetchContracts = () => {
     api.query.dappsStaking.registeredDapps.keys().then(
       result => {
+        // console.log('registeredDapps result', result);
         const r = result.map(c => '0x' + c.toString().slice(-40));
-        setContracts(r);
+        // console.log(r);
+        const contractList = r.map(c => (c));
+        console.log('fetchContracts', contractList);
+        setContracts(contractList);
       }
     )
       .catch(console.error);
@@ -34,7 +37,9 @@ function Main (props) {
           ]);
           console.log('contractEraStake.entries ', eraMap);
           eraMap.forEach(([key, points]) => {
+            // console.log('[key, points] = ', key, points);
             const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
+            // console.log('eraKey', eraKey);
             eraStakeMap.set(eraKey, points.toJSON());
           });
 
@@ -42,8 +47,10 @@ function Main (props) {
           if (eraStakeMap.size !== 0) {
             // number of stakers
             const lastStaked = Math.max(...eraStakeMap.keys());
+            // console.log('queryEraStakeMap lastStaked', lastStaked);
             const entry = eraStakeMap.get(lastStaked);
             const stakerNum = Object.keys(entry.stakers).length;
+            // console.log('queryEraStakeMap stakerNum', stakerNum);
             setNumStakers(s => s + stakerNum);
           }
         } catch (e) {
@@ -54,39 +61,24 @@ function Main (props) {
     getInfo();
   };
 
-  const queryRegisteredDapps = () => {
-    api.query.dappsStaking.registeredDapps.keys().then(
-      result => {
-        setDappsCount(result.length);
-      }
-    ).catch(console.error);
-  };
-
   useEffect(fetchContracts, [api.query.dappsStaking]);
   useEffect(queryEraStakeMap, [api.query.dappsStaking, contracts]);
-  useEffect(queryRegisteredDapps, [api.query.dappsStaking, api.query.dappsStaking.registeredDapps]);
 
   return (
     <Grid.Column>
-      <Card>
+      <Card color='purple'>
         <Card.Content textAlign='center'>
           <Statistic
-            label='dApps Count'
-            value={dappsCount}
+            label='Stakers Count'
+            value={numStakers}
           />
-        </Card.Content>
-        <Card.Content extra>
-          staker count: {numStakers}
         </Card.Content>
       </Card>
     </Grid.Column>
   );
 }
 
-export default function DappsCount (props) {
+export default function StakerCount (props) {
   const { api } = useSubstrate();
-  return api.query.dappsStaking &&
-    api.query.dappsStaking.registeredDapps
-    ? <Main {...props} />
-    : null;
+  return api ? <Main {...props} /> : null;
 }

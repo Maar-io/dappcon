@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.js": "/dappcon/static/js/main.12957d68.chunk.js",
-    "main.js.map": "/dappcon/static/js/main.12957d68.chunk.js.map",
+    "main.js": "/dappcon/static/js/main.5f43b846.chunk.js",
+    "main.js.map": "/dappcon/static/js/main.5f43b846.chunk.js.map",
     "runtime-main.js": "/dappcon/static/js/runtime-main.96bb2761.js",
     "runtime-main.js.map": "/dappcon/static/js/runtime-main.96bb2761.js.map",
     "static/css/2.9c0378b8.chunk.css": "/dappcon/static/css/2.9c0378b8.chunk.css",
@@ -16,6 +16,6 @@
     "static/js/runtime-main.96bb2761.js",
     "static/css/2.9c0378b8.chunk.css",
     "static/js/2.64cbe85d.chunk.js",
-    "static/js/main.12957d68.chunk.js"
+    "static/js/main.5f43b846.chunk.js"
   ]
 }

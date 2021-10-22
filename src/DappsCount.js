@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Statistic, Grid, Card } from 'semantic-ui-react';
+import { Statistic, Grid, Card, Icon, Progress } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
 
@@ -8,6 +8,8 @@ function Main (props) {
   const [dappsCount, setDappsCount] = useState(0);
   const [contracts, setContracts] = useState([]);
   const [numStakers, setNumStakers] = useState(0);
+  const [fillup, setFillup] = useState(0);
+
   const getAddressEnum = (address) => (
     { Evm: address }
   );
@@ -32,13 +34,13 @@ function Main (props) {
               getAddressEnum(selectedContract)
             )
           ]);
-          console.log('contractEraStake.entries ', eraMap);
+          // console.log('contractEraStake.entries ', eraMap);
           eraMap.forEach(([key, points]) => {
             const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
             eraStakeMap.set(eraKey, points.toJSON());
           });
 
-          console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
+          // console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
           if (eraStakeMap.size !== 0) {
             // number of stakers
             const lastStaked = Math.max(...eraStakeMap.keys());
@@ -62,6 +64,13 @@ function Main (props) {
     ).catch(console.error);
   };
 
+  const calcProgress = () => {
+    const maxStakers = api.consts.dappsStaking.maxNumberOfStakersPerContract.toNumber();
+    const available = dappsCount * maxStakers;
+    setFillup(numStakers / available * 100);
+  };
+
+  useEffect(calcProgress, [dappsCount, api.consts.dappsStaking.maxNumberOfStakersPerContract, numStakers]);
   useEffect(fetchContracts, [api.query.dappsStaking]);
   useEffect(queryEraStakeMap, [api.query.dappsStaking, contracts]);
   useEffect(queryRegisteredDapps, [api.query.dappsStaking, api.query.dappsStaking.registeredDapps]);
@@ -76,7 +85,9 @@ function Main (props) {
           />
         </Card.Content>
         <Card.Content extra>
-          staker count: {numStakers}
+          Stakers Count and Capacity:
+          <Icon name='user' /> {numStakers}
+          <Progress percent={fillup} indicating warning />
         </Card.Content>
       </Card>
     </Grid.Column>

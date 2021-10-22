@@ -41,9 +41,9 @@ function Main (props) {
           />
         </Card.Content>
         <Card.Content extra>
-          <Progress percent={progress} indicating success />
           Blocks until new era :
           <Icon name='time' /> {blockCountdown}
+          <Progress percent={progress} indicating success />
         </Card.Content>
       </Card>
     </Grid.Column>

@@ -15,6 +15,7 @@ function Main (props) {
   const [claimedRewards, setClaimedRewards] = useState(0);
   const [numStakers, setNumStakers] = useState(0);
   const [erasToClaim, setErasToClaim] = useState(0);
+  const [firstTime, setFirstTimeStaked] = useState(0);
 
   const getAddressEnum = (address) => (
     { Evm: address }
@@ -107,6 +108,7 @@ function Main (props) {
           api.query.dappsStaking.currentEra(currentEra => {
             const historyDepth = parseInt(api.consts.dappsStaking.historyDepth.toString());
             let firstStakedEra = Math.min(...eraStakeMap.keys());
+            setFirstTimeStaked(firstStakedEra);
             firstStakedEra = Math.max(firstStakedEra, Math.max(1, currentEra - historyDepth));
             let oldest = firstStakedEra;
             for (let era = firstStakedEra; era <= currentEra; era++) {
@@ -156,6 +158,7 @@ function Main (props) {
         <DisplayTable
           developer={developer}
           numStakers={numStakers}
+          firstTime={firstTime}
           oldestToClaim={oldestToClaim}
           lastStaked={lastStaked}
           totalStaked={totalStaked}
@@ -181,6 +184,14 @@ function DisplayTable (props) {
         <Table.Row>
           <Table.HeaderCell >Developer's account:</Table.HeaderCell>
           <Table.HeaderCell >{props.developer}</Table.HeaderCell>
+        <Table.Cell>
+            <Header as='h2'>
+              <Header.Content>
+                {props.firstTime}
+                <Header.Subheader>First Time Staked</Header.Subheader>
+              </Header.Content>
+            </Header>
+          </Table.Cell>
         </Table.Row>
       </Table.Header>
       <Table.Body>

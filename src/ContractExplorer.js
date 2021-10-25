@@ -99,18 +99,19 @@ function Main (props) {
           console.log('queryEraStakeMap total', total);
           setTotalStaked(total);
 
-          // total rewards on the contract
+          // last claimed amount of rewards on the contract
           const rewards = parseInt(entry.claimed_rewards / DECIMALS);
-          console.log('queryEraStakeMap claimed_rewards', rewards);
-          setClaimedRewards(rewards);
-
+          console.log('queryEraStakeMap last claimed_rewards', rewards);
+          
           // oldest era to Claim
           api.query.dappsStaking.currentEra(currentEra => {
             const historyDepth = parseInt(api.consts.dappsStaking.historyDepth.toString());
             let firstStakedEra = Math.min(...eraStakeMap.keys());
+            setClaimedRewards(0);
             setFirstTimeStaked(firstStakedEra);
             firstStakedEra = Math.max(firstStakedEra, Math.max(1, currentEra - historyDepth));
             let oldest = firstStakedEra;
+            // find era when it was last claimed
             for (let era = firstStakedEra; era <= currentEra; era++) {
               const mapEntry = eraStakeMap.get(era);
               if (typeof (mapEntry) !== 'undefined') {
@@ -118,14 +119,18 @@ function Main (props) {
                 setClaimedRewards(r => r + claimed);
                 // console.log('claimedRewards = ', era, claimed);
                 if (claimed === 0) {
-                  // console.log('oldest = ', era);
-                  oldest = era;
+                  oldest = era-1;
+                  // console.log('oldest  0 = ', era);
                   break;
                 }
               }
+              else{ // map entry can be undefined if there were no staking in last era
+                oldest = era-1;
+                // console.log('oldest = ', era);
+              }
             }
             setOldestToClaim(oldest);
-            setErasToClaim(currentEra - oldest);
+            setErasToClaim(currentEra - oldest - 1);
           }).catch(console.error);
         }
       } catch (e) {
@@ -208,7 +213,7 @@ function DisplayTable (props) {
             <Header as='h2'>
               <Header.Content>
                 {props.oldestToClaim}
-                <Header.Subheader>Last Time Claimed</Header.Subheader>
+                <Header.Subheader>Last Era Claimed</Header.Subheader>
               </Header.Content>
             </Header>
           </Table.Cell>

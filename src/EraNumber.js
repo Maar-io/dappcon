@@ -13,8 +13,8 @@ function Main (props) {
     const getData = async () => {
       try {
         // set current era
-        const era = await api.query.dappsStaking.currentEra();
-        setCurrentEra(era.toNumber());
+        const era = (await api.query.dappsStaking.currentEra()).toNumber();
+        setCurrentEra(era);
 
         // set progress and block countdown
         const blockPerEra = await api.consts.dappsStaking.blockPerEra.toNumber();

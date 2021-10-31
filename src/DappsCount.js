@@ -44,13 +44,11 @@ function Main (props) {
           const eraMap = await api.query.dappsStaking.contractEraStake.entries(
             getAddressEnum(selectedContract)
           );
-          // console.log('contractEraStake.entries ', eraMap);
           eraMap.forEach(([key, points]) => {
             const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
             eraStakeMap.set(eraKey, points.toJSON());
           });
 
-          // console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
           if (eraStakeMap.size !== 0) {
             // number of stakers
             const lastStaked = Math.max(...eraStakeMap.keys());
@@ -68,6 +66,7 @@ function Main (props) {
     const queryRegisteredDapps = async () => {
       try {
         const result = await api.query.dappsStaking.registeredDapps.keys();
+        console.log('dappsCount =', result.length);
         setDappsCount(result.length);
       } catch (err) { console.error(err); }
     };

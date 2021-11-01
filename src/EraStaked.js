@@ -2,42 +2,36 @@ import React, { useEffect, useState } from 'react';
 import { Statistic, Grid, Card, Icon } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
-const DECIMALS = 1_000_000_000_000_000_000;
+const DECIMALS = '1000000000000000000';
 
 function Main (props) {
   const { api } = useSubstrate();
-  const [era, setCurrentEra] = useState(0);
+  // const [era, setCurrentEra] = useState(0);
   const [stakedTotal, setStakedTotal] = useState(0);
   const [rewards, setRewards] = useState(0);
 
   useEffect(() => {
-    let unsubscribe;
-    api.query.dappsStaking.currentEra(e => {
-      setCurrentEra(e.toNumber());
-    });
+    const updateData = async () => {
+      try {
+        // read current era
+        const era = await api.query.dappsStaking.currentEra();
 
-    api.query.dappsStaking.eraRewardsAndStakes(era, (result) => {
-      if (result.isNone) {
-        setStakedTotal('<None>');
-      } else {
+        // read rewards and staked for current era
+        const result = await api.query.dappsStaking.eraRewardsAndStakes(era);
+
+        // extract staked amount (TVL)
         const tvl = parseInt(result.unwrap().staked.valueOf() / DECIMALS);
+        console.log('TVL =', tvl);
         setStakedTotal(tvl);
-      }
-    })
-      .catch(console.error);
 
-    api.query.dappsStaking.blockRewardAccumulator((result) => {
-      if (result.isNone) {
-        setRewards('<None>');
-      } else {
-        const reward = parseInt(result / DECIMALS);
+        // read accumulated rewards in this era
+        const acc = await api.query.dappsStaking.blockRewardAccumulator();
+        const reward = parseInt(acc / DECIMALS);
         setRewards(reward);
-      }
-    })
-      .catch(console.error);
-
-    return () => unsubscribe && unsubscribe();
-  }, [api.query.dappsStaking, api.query.dappsStaking.blockRewardAccumulator, era]);
+      } catch (err) { console.error(err); }
+    };
+    updateData();
+  }, [api.query.dappsStaking, api.query.dappsStaking.blockRewardAccumulator]);
 
   return (
     <Grid.Column>

@@ -21,19 +21,7 @@ function Main (props) {
     { Evm: address }
   );
 
-  const fetchContracts = () => {
-    api.query.dappsStaking.registeredDapps.keys().then(
-      result => {
-        // console.log('registeredDapps result', result);
-        const r = result.map(c => '0x' + c.toString().slice(-40));
-        // console.log(r);
-        const contractList = r.map(c => ({ key: c, value: c, text: c }));
-        console.log('fetchContracts', contractList);
-        setContracts(contractList);
-      }
-    )
-      .catch(console.error);
-  };
+
 
   const resetContractInfo = () => {
     setDeveloper(0);
@@ -68,12 +56,10 @@ function Main (props) {
       const eraStakeMap = new Map();
 
       try {
-        const [eraMap] = await Promise.all([
-          api.query.dappsStaking.contractEraStake.entries(
-            getAddressEnum(selectedContract)
-          )
-        ]);
-        // console.log('contractEraStake.entries ', eraMap);
+        const eraMap = await api.query.dappsStaking.contractEraStake.entries(
+          getAddressEnum(selectedContract)
+        );
+        console.log('contractEraStake.entries ', eraMap);
         eraMap.forEach(([key, points]) => {
           // console.log('[key, points] = ', key, points);
           const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
@@ -102,7 +88,6 @@ function Main (props) {
           // last claimed amount of rewards on the contract
           const rewards = parseInt(entry.claimed_rewards / DECIMALS);
           console.log('queryEraStakeMap last claimed_rewards', rewards);
-          
           // oldest era to Claim
           api.query.dappsStaking.currentEra(currentEra => {
             const historyDepth = parseInt(api.consts.dappsStaking.historyDepth.toString());
@@ -119,13 +104,13 @@ function Main (props) {
                 setClaimedRewards(r => r + claimed);
                 // console.log('claimedRewards = ', era, claimed);
                 if (claimed === 0) {
-                  oldest = era-1;
+                  oldest = era - 1;
                   // console.log('oldest  0 = ', era);
                   break;
                 }
               }
-              else{ // map entry can be undefined if there were no staking in last era
-                oldest = era-1;
+              else { // map entry can be undefined if there were no staking in last era
+                oldest = era - 1;
                 // console.log('oldest = ', era);
               }
             }
@@ -140,8 +125,33 @@ function Main (props) {
     getInfo();
   };
 
-  useEffect(fetchContracts, [api.query.dappsStaking]);
-  useEffect(queryDeveloper, [api.query.dappsStaking, selectedContract]);
+  useEffect(() => {
+    const fetchContracts = async () => {
+      try {
+        const result = await api.query.dappsStaking.registeredDapps.keys();
+        console.log('registeredDapps result', result);
+        const r = result.map(c => '0x' + c.toString().slice(-40));
+        // console.log(r);
+        const contractList = r.map(c => ({ key: c, value: c, text: c }));
+        console.log('fetchContracts', contractList);
+        setContracts(contractList);
+      }
+      catch (err) { console.error(err); }
+    };
+    fetchContracts();
+  }, [api.query.dappsStaking]);
+
+  useEffect(() => {
+    const queryDeveloper = async () => {
+      try {
+        const result = await api.query.dappsStaking.registeredDapps(getAddressEnum(selectedContract));
+        console.log('selected developer', result.unwrap().toHuman());
+        setDeveloper(result.unwrap().toHuman());
+      }
+      catch (err) { console.error(err); }
+    }
+    queryDeveloper();
+  }, [api.query.dappsStaking, selectedContract]);
   useEffect(queryEraStakeMap, [api.query.dappsStaking, api.consts.dappsStaking.historyDepth, selectedContract]);
 
   return (
@@ -189,7 +199,7 @@ function DisplayTable (props) {
         <Table.Row>
           <Table.HeaderCell >Developer's account:</Table.HeaderCell>
           <Table.HeaderCell >{props.developer}</Table.HeaderCell>
-        <Table.Cell>
+          <Table.Cell>
             <Header as='h2'>
               <Header.Content>
                 {props.firstTime}

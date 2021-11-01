@@ -14,33 +14,41 @@ function Main (props) {
     { Evm: address }
   );
 
-  const fetchContracts = () => {
-    api.query.dappsStaking.registeredDapps.keys().then(
-      result => {
-        const r = result.map(c => '0x' + c.toString().slice(-40));
-        setContracts(r);
-      }
-    )
-      .catch(console.error);
-  };
+  useEffect(() => {
+    const calcProgress = async () => {
+      try {
+        const maxStakers = await api.consts.dappsStaking.maxNumberOfStakersPerContract.toNumber();
+        const available = dappsCount * maxStakers;
+        setFillup(numStakers / available * 100);
+      } catch (err) { console.error(err); }
+    };
+    calcProgress();
+  }, [dappsCount, api.consts.dappsStaking.maxNumberOfStakersPerContract, numStakers]);
 
-  const queryEraStakeMap = () => {
-    const getInfo = async () => {
+  useEffect(() => {
+    const fetchContracts = async () => {
+      try {
+        let result = await api.query.dappsStaking.registeredDapps.keys();
+        result = result.map(c => '0x' + c.toString().slice(-40));
+        setContracts(result);
+      } catch (err) { console.error(err); }
+    };
+    fetchContracts();
+  }, [api.query.dappsStaking]);
+
+  useEffect(() => {
+    const queryEraStakeMap = async () => {
       contracts.forEach(async selectedContract => {
         const eraStakeMap = new Map();
         try {
-          const [eraMap] = await Promise.all([
-            api.query.dappsStaking.contractEraStake.entries(
-              getAddressEnum(selectedContract)
-            )
-          ]);
-          // console.log('contractEraStake.entries ', eraMap);
+          const eraMap = await api.query.dappsStaking.contractEraStake.entries(
+            getAddressEnum(selectedContract)
+          );
           eraMap.forEach(([key, points]) => {
             const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
             eraStakeMap.set(eraKey, points.toJSON());
           });
 
-          // console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
           if (eraStakeMap.size !== 0) {
             // number of stakers
             const lastStaked = Math.max(...eraStakeMap.keys());
@@ -48,32 +56,22 @@ function Main (props) {
             const stakerNum = Object.keys(entry.stakers).length;
             setNumStakers(s => s + stakerNum);
           }
-        } catch (e) {
-          console.error(e);
-        }
+        } catch (err) { console.error(err); }
       });
     };
-    getInfo();
-  };
+    queryEraStakeMap();
+  }, [api.query.dappsStaking, contracts]);
 
-  const queryRegisteredDapps = () => {
-    api.query.dappsStaking.registeredDapps.keys().then(
-      result => {
+  useEffect(() => {
+    const queryRegisteredDapps = async () => {
+      try {
+        const result = await api.query.dappsStaking.registeredDapps.keys();
+        console.log('dappsCount =', result.length);
         setDappsCount(result.length);
-      }
-    ).catch(console.error);
-  };
-
-  const calcProgress = () => {
-    const maxStakers = api.consts.dappsStaking.maxNumberOfStakersPerContract.toNumber();
-    const available = dappsCount * maxStakers;
-    setFillup(numStakers / available * 100);
-  };
-
-  useEffect(calcProgress, [dappsCount, api.consts.dappsStaking.maxNumberOfStakersPerContract, numStakers]);
-  useEffect(fetchContracts, [api.query.dappsStaking]);
-  useEffect(queryEraStakeMap, [api.query.dappsStaking, contracts]);
-  useEffect(queryRegisteredDapps, [api.query.dappsStaking, api.query.dappsStaking.registeredDapps]);
+      } catch (err) { console.error(err); }
+    };
+    queryRegisteredDapps();
+  }, [api.query.dappsStaking, api.query.dappsStaking.registeredDapps]);
 
   return (
     <Grid.Column>

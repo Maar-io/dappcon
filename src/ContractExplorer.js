@@ -21,8 +21,6 @@ function Main (props) {
     { Evm: address }
   );
 
-
-
   const resetContractInfo = () => {
     setDeveloper(0);
     setLastStaked(0);
@@ -38,17 +36,6 @@ function Main (props) {
     console.log('onContractChange value', data.value);
     setSelectedContract(data.value);
     setFormState(data.value);
-  };
-
-  const queryDeveloper = () => {
-    console.log('queryDeveloper selectedContract is', selectedContract);
-    let res;
-    api.query.dappsStaking.registeredDapps(getAddressEnum(selectedContract), result => {
-      result.isNone ? res = 'none' : res = result.unwrap().toHuman();
-      console.log('queryDeveloper res', res);
-      setDeveloper(res);
-    })
-      .catch(console.error);
   };
 
   const queryEraStakeMap = () => {
@@ -108,8 +95,7 @@ function Main (props) {
                   // console.log('oldest  0 = ', era);
                   break;
                 }
-              }
-              else { // map entry can be undefined if there were no staking in last era
+              } else { // map entry can be undefined if there were no staking in last era
                 oldest = era - 1;
                 // console.log('oldest = ', era);
               }
@@ -118,8 +104,9 @@ function Main (props) {
             setErasToClaim(currentEra - oldest - 1);
           }).catch(console.error);
         }
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
+        console.log('queryEraStakeMap failed');
       }
     };
     getInfo();
@@ -135,8 +122,10 @@ function Main (props) {
         const contractList = r.map(c => ({ key: c, value: c, text: c }));
         console.log('fetchContracts', contractList);
         setContracts(contractList);
+      } catch (err) {
+        console.error(err);
+        console.log('fetchContracts registeredDapps.keys() failed');
       }
-      catch (err) { console.error(err); }
     };
     fetchContracts();
   }, [api.query.dappsStaking]);
@@ -145,13 +134,18 @@ function Main (props) {
     const queryDeveloper = async () => {
       try {
         const result = await api.query.dappsStaking.registeredDapps(getAddressEnum(selectedContract));
-        console.log('selected developer', result.unwrap().toHuman());
-        setDeveloper(result.unwrap().toHuman());
+        let res;
+        result.isNone ? res = 'none' : res = result.unwrap().toHuman();
+        console.log('contract=', selectedContract, 'setDeveloper to', res);
+        setDeveloper(res);
+      } catch (err) {
+        console.error(err);
+        console.log('queryEraStakeMap registeredDapps failed');
       }
-      catch (err) { console.error(err); }
-    }
+    };
     queryDeveloper();
   }, [api.query.dappsStaking, selectedContract]);
+
   useEffect(queryEraStakeMap, [api.query.dappsStaking, api.consts.dappsStaking.historyDepth, selectedContract]);
 
   return (

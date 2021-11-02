@@ -1,18 +1,12 @@
-const contract = '0x0000000000000000000000000000000000000001';
+const CONTRACT = '0x0000000000000000000000000000000000000001';
+const ERA = 3;
 
 const getAddressEnum = (address) => (
   { 'Evm': address }
 );
 
-const lastStaked = await api.query.dappsStaking.contractLastStaked(getAddressEnum(contract), result => {
-  result.isNone ? res = 'never' : res = result.unwrap().toNumber();
-  console.log('Era when contract was last staked is ', res);
-})
-  .catch(console.error);
-
-await api.query.dappsStaking.contractEraStake(getAddressEnum(contract), parseInt(3), result => { // TODO unsigned(laststaked)
+await api.query.dappsStaking.contractEraStake(getAddressEnum(CONTRACT), parseInt(ERA), result => {
   result.isNone ? res = 'never' : res = result.unwrap().total.toHuman();
   console.log('Total steked =', res);
 })
   .catch(console.error);
-  

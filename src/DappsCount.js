@@ -37,33 +37,31 @@ function Main (props) {
   }, [api.query.dappsStaking]);
 
   useEffect(() => {
-    const queryEraStakeMap = async () => {
+    const calcNumStakers = async () => {
+      const currentEra = (await api.query.dappsStaking.currentEra()).toNumber();
       contracts.forEach(async selectedContract => {
-        const eraStakeMap = new Map();
-        try {
-          const eraMap = await api.query.dappsStaking.contractEraStake.entries(
-            getAddressEnum(selectedContract)
-          );
-          // console.log('DappsCount contractEraStake.entries = ', eraMap);
-          eraMap.forEach(([key, points]) => {
-            const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
-            eraStakeMap.set(eraKey, points.toJSON());
-          });
+        // iterate from currentEra backwards until you find record for ContractEraStake
+        for (let era = currentEra; era > 0; era -= 1) {
+          try {
+            const staking_info = (await api.query.dappsStaking.contractEraStake(
+              getAddressEnum(selectedContract), era
+            )).toJSON();
 
-          if (eraStakeMap.size !== 0) {
-            // number of stakers
-            const lastStaked = Math.max(...eraStakeMap.keys());
-            const entry = eraStakeMap.get(lastStaked);
-            const stakerNum = Object.keys(entry.stakers).length;
-            setNumStakers(s => s + stakerNum);
+            if (staking_info !== null){
+              // found record for ContractEraStake
+              const stakerNum = Object.keys(staking_info.stakers).length
+              console.log('Num stakers =', stakerNum );
+              setNumStakers(s => s + stakerNum);
+              break;
+            }
+          } catch (err) {
+            console.error(err);
+            console.log('DappsCount contractEraStake.entries failed');
           }
-        } catch (err) {
-          console.error(err);
-          console.log('DappsCount contractEraStake.entries failed');
         }
       });
     };
-    queryEraStakeMap();
+    calcNumStakers();
   }, [api.query.dappsStaking, contracts]);
 
   useEffect(() => {

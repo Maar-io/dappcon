@@ -66,14 +66,18 @@ function Main (props) {
 
   useEffect(() => {
     const queryRegisteredDapps = async () => {
-      try {
-        const result = await api.query.dappsStaking.registeredDapps.keys();
+      return await api.query.dappsStaking.registeredDapps.keys((result) => {
         console.log('dappsCount =', result.length);
         setDappsCount(result.length);
-      } catch (err) { console.error(err); }
+      });
+    }
+
+    const unsub = queryRegisteredDapps();
+
+    return function cleanup() {
+      unsub;
     };
-    queryRegisteredDapps();
-  }, [api.query.dappsStaking, api.query.dappsStaking.registeredDapps]);
+  });
 
   return (
     <Grid.Column>

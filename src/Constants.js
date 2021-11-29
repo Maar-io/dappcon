@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Icon, Step } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
+const DECIMALS = 1_000_000_000_000_000_000;
 
 function Main (props) {
   const { api } = useSubstrate();
@@ -18,8 +19,8 @@ function Main (props) {
     setMaxStakers(stakers);
     const depth = api.consts.dappsStaking.historyDepth.toNumber();
     setHistoryDepth(depth);
-    const stakingAmount = api.consts.dappsStaking.minimumStakingAmount.toHuman();
-    setMinStaking(stakingAmount);
+    const stakingAmount = api.consts.dappsStaking.minimumStakingAmount.valueOf();
+    setMinStaking(parseInt(stakingAmount / DECIMALS));
     return () => unsubscribe;
   }, [api.consts]);
 

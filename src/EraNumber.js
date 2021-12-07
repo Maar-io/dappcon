@@ -3,31 +3,35 @@ import { Statistic, Grid, Card, Icon, Progress } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
 
-function Main (props) {
+function Main(props) {
   const { api } = useSubstrate();
   const [era, setCurrentEra] = useState(0);
   const [blockCountdown, setBlockCountdown] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        // set current era
-        const era = (await api.query.dappsStaking.currentEra()).toNumber();
-        setCurrentEra(era);
+  const blockPerEra = api.consts.dappsStaking.blockPerEra.toNumber();
+  const currentEra = api.query.dappsStaking.currentEra;
+  const bestNumber = api.derive.chain.bestNumber;
 
-        // set progress and block countdown
-        const blockPerEra = await api.consts.dappsStaking.blockPerEra.toNumber();
-        await api.derive.chain.bestNumber(bestNumber => {
-          setProgress((bestNumber % blockPerEra) / blockPerEra * 100);
-          setBlockCountdown(blockPerEra - (bestNumber % blockPerEra));
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    getData();
-  }, [api.consts.dappsStaking.blockPerEra, api.query.dappsStaking, api.derive.chain]);
+  useEffect(() => {
+    let unsubscribeAll = null;
+
+    bestNumber(number => {
+      setProgress((number % blockPerEra) / blockPerEra * 100);
+      setBlockCountdown(blockPerEra - (number % blockPerEra));
+    })
+      .then(unsub => {
+        unsubscribeAll = unsub;
+      })
+      .catch(console.error);
+
+    api.query.dappsStaking.currentEra(e => {
+      setCurrentEra(e.toNumber());
+    }).catch(console.error);
+
+
+    return () => unsubscribeAll && unsubscribeAll();
+  }, [currentEra, bestNumber, blockPerEra, api.query.dappsStaking]);
 
   return (
     <Grid.Column>
@@ -48,7 +52,7 @@ function Main (props) {
   );
 }
 
-export default function EraNumber (props) {
+export default function CurrentEra(props) {
   const { api } = useSubstrate();
   return api.query.dappsStaking.currentEra
     ? <Main {...props} />

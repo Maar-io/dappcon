@@ -49,7 +49,7 @@ function Main (props) {
 
             if (staking_info !== null){
               // found record for ContractEraStake
-              const stakerNum = Object.keys(staking_info.stakers).length
+              const stakerNum = Object.keys(staking_info.stakers).length;
               console.log('Num stakers =', stakerNum );
               setNumStakers(s => s + stakerNum);
               break;
@@ -65,19 +65,19 @@ function Main (props) {
   }, [api.query.dappsStaking, contracts]);
 
   useEffect(() => {
-    const queryRegisteredDapps = async () => {
-      return await api.query.dappsStaking.registeredDapps.keys((result) => {
-        console.log('dappsCount =', result.length);
-        setDappsCount(result.length);
+    console.log('Registering for events');
+    api.query.system.events((events) => {
+      events.forEach(async (record) => {
+        const { event } = record;
+  
+        if (event.section === 'dappsStaking' && event.method === 'NewContract') {
+          const result = await api.query.dappsStaking.registeredDapps.keys();
+          console.log('dappsCount =', result.length);
+          setDappsCount(result.length);
+        }
       });
-    }
-
-    const unsub = queryRegisteredDapps();
-
-    return function cleanup() {
-      unsub;
-    };
-  });
+    });
+  }, []);
 
   return (
     <Grid.Column>

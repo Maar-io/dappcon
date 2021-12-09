@@ -43,14 +43,14 @@ function Main (props) {
         // iterate from currentEra backwards until you find record for ContractEraStake
         for (let era = currentEra; era > 0; era -= 1) {
           try {
-            const staking_info = (await api.query.dappsStaking.contractEraStake(
+            const stakingInfo = (await api.query.dappsStaking.contractEraStake(
               getAddressEnum(selectedContract), era
             )).toJSON();
 
-            if (staking_info !== null){
+            if (stakingInfo !== null) {
               // found record for ContractEraStake
-              const stakerNum = Object.keys(staking_info.stakers).length;
-              console.log('Num stakers =', stakerNum );
+              const stakerNum = Object.keys(stakingInfo.stakers).length;
+              console.log('Num stakers =', stakerNum);
               setNumStakers(s => s + stakerNum);
               break;
             }
@@ -69,7 +69,7 @@ function Main (props) {
     api.query.system.events((events) => {
       events.forEach(async (record) => {
         const { event } = record;
-  
+
         if (event.section === 'dappsStaking' && event.method === 'NewContract') {
           const result = await api.query.dappsStaking.registeredDapps.keys();
           console.log('dappsCount =', result.length);
@@ -77,7 +77,7 @@ function Main (props) {
         }
       });
     });
-  }, []);
+  }, [api.query.dappsStaking.registeredDapps, api.query.system]);
 
   return (
     <Grid.Column>

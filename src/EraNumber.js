@@ -3,7 +3,7 @@ import { Statistic, Grid, Card, Icon, Progress } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
 
-function Main(props) {
+function Main (props) {
   const { api } = useSubstrate();
   const [era, setCurrentEra] = useState(0);
   const [blockCountdown, setBlockCountdown] = useState(0);
@@ -29,7 +29,6 @@ function Main(props) {
       setCurrentEra(e.toNumber());
     }).catch(console.error);
 
-
     return () => unsubscribeAll && unsubscribeAll();
   }, [currentEra, bestNumber, blockPerEra, api.query.dappsStaking]);
 
@@ -52,7 +51,7 @@ function Main(props) {
   );
 }
 
-export default function CurrentEra(props) {
+export default function CurrentEra (props) {
   const { api } = useSubstrate();
   return api.query.dappsStaking.currentEra
     ? <Main {...props} />

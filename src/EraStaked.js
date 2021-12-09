@@ -24,9 +24,9 @@ function Main (props) {
         setStakedTotal(tvl);
       }
     })
-    .catch(console.error);
+      .catch(console.error);
 
-    api.query.dappsStaking.blockRewardAccumulator( (result) => {
+    api.query.dappsStaking.blockRewardAccumulator((result) => {
       if (result.isNone) {
         setRewards('<None>');
       } else {
@@ -34,7 +34,7 @@ function Main (props) {
         setRewards(reward);
       }
     })
-    .catch(console.error);
+      .catch(console.error);
 
     return () => unsubscribe;
   }, [api.query.dappsStaking, era]);
@@ -50,9 +50,9 @@ function Main (props) {
         </Card.Content>
         <Card.Content extra>
 
-         upcoming rewards
-         <Icon name='hand point right outline' />
-         {rewards}
+          upcoming rewards
+          <Icon name='hand point right outline' />
+          {rewards}
         </Card.Content>
       </Card>
     </Grid.Column>

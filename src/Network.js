@@ -13,6 +13,9 @@ function Main (props) {
   const networkOptions =
     [
       {
+        key: 'Astar', text: 'Astar (mainnet)', value: 'wss://astar.api.onfinality.io/public-ws'
+      },
+      {
         key: 'Shiden', text: 'Shiden (mainnet)', value: 'wss://shiden.api.onfinality.io/public-ws'
       },
       {

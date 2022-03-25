@@ -56,6 +56,7 @@ function Main (props) {
 
         console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
         if (eraStakeMap.size !== 0) {
+          // TODO: Not correct anymore since the map is no longer sparse - we have entry for each era.
           // contract last staked
           const lastStaked = Math.max(...eraStakeMap.keys());
           console.log('queryEraStakeMap lastStaked', lastStaked);
@@ -63,7 +64,7 @@ function Main (props) {
 
           // number of stakers
           const entry = eraStakeMap.get(lastStaked);
-          const stakerNum = Object.keys(entry.stakers).length;
+          const stakerNum = parseInt(entry.number_of_stakers);
           console.log('queryEraStakeMap stakerNum', stakerNum);
           setNumStakers(stakerNum);
 
@@ -73,11 +74,13 @@ function Main (props) {
           setTotalStaked(total);
 
           // last claimed amount of rewards on the contract
-          const rewards = parseInt(entry.claimed_rewards / DECIMALS);
+          // TODO: this isn't valid anymore
+          const rewards = 0;
           console.log('queryEraStakeMap last claimed_rewards', rewards);
           // oldest era to Claim
           api.query.dappsStaking.currentEra(currentEra => {
-            const historyDepth = parseInt(api.consts.dappsStaking.historyDepth.toString());
+            // TODO: there is no more history depth
+            const historyDepth = currentEra;
             let firstStakedEra = Math.min(...eraStakeMap.keys());
             setClaimedRewards(0);
             setFirstTimeStaked(firstStakedEra);
@@ -87,7 +90,8 @@ function Main (props) {
             for (let era = firstStakedEra; era <= currentEra; era++) {
               const mapEntry = eraStakeMap.get(era);
               if (typeof (mapEntry) !== 'undefined') {
-                const claimed = parseInt(mapEntry.claimed_rewards / DECIMALS);
+                // TODO: not relevant anymore
+                const claimed = 1;
                 setClaimedRewards(r => r + claimed);
                 // console.log('claimedRewards = ', era, claimed);
                 if (claimed === 0) {
@@ -135,7 +139,7 @@ function Main (props) {
       try {
         const result = await api.query.dappsStaking.registeredDapps(getAddressEnum(selectedContract));
         let res;
-        result.isNone ? res = 'none' : res = result.unwrap().toHuman();
+        result.isNone ? res = 'none' : res = result.unwrap().developer.toHuman();
         console.log('contract=', selectedContract, 'setDeveloper to', res);
         setDeveloper(res);
       } catch (err) {
@@ -146,7 +150,8 @@ function Main (props) {
     queryDeveloper();
   }, [api.query.dappsStaking, selectedContract]);
 
-  useEffect(queryEraStakeMap, [api.query.dappsStaking, api.consts.dappsStaking.historyDepth, selectedContract]);
+  // TODO: removed history depth
+  useEffect(queryEraStakeMap, [api.query.dappsStaking, selectedContract]);
 
   return (
     <Grid.Column width={8}>

@@ -16,7 +16,7 @@ function Main (props) {
       setCurrentEra(e.toNumber());
     });
 
-    api.query.dappsStaking.eraRewardsAndStakes(era, (result) => {
+    api.query.dappsStaking.generalEraInfo(era, (result) => {
       if (result.isNone) {
         setStakedTotal('<None>');
       } else {
@@ -30,7 +30,7 @@ function Main (props) {
       if (result.isNone) {
         setRewards('<None>');
       } else {
-        const reward = parseInt(result / DECIMALS);
+        const reward = parseInt(result.stakers) + parseInt(result.dapps) / DECIMALS;
         setRewards(reward);
       }
     })

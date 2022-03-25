@@ -49,7 +49,7 @@ function Main (props) {
             const lastStaked = Math.max(...eraStakeMap.keys());
             // console.log('queryEraStakeMap lastStaked', lastStaked);
             const entry = eraStakeMap.get(lastStaked);
-            const stakerNum = Object.keys(entry.stakers).length;
+            const stakerNum = parseInt(entry.number_of_stakers);
             // console.log('queryEraStakeMap stakerNum', stakerNum);
             setNumStakers(s => s + stakerNum);
           }

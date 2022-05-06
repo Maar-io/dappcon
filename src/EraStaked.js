@@ -20,7 +20,7 @@ function Main (props) {
       if (result.isNone) {
         setStakedTotal('<None>');
       } else {
-        const tvl = parseInt(result.unwrap().staked.valueOf() / DECIMALS);
+        const tvl = parseInt(result.unwrap().staked.valueOf() / DECIMALS / 1_000_000);
         setStakedTotal(tvl);
       }
     })
@@ -44,7 +44,7 @@ function Main (props) {
       <Card>
         <Card.Content textAlign='center'>
           <Statistic
-            label='TVL in dApps'
+            label='TVL in dApps (mil)'
             value={stakedTotal}
           />
         </Card.Content>

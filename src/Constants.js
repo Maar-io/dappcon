@@ -8,7 +8,6 @@ function Main (props) {
   const { api } = useSubstrate();
   const [blocksPerEra, setBlocksPerEra] = useState(0);
   const [maxStakers, setMaxStakers] = useState(0);
-  const [historyDepth, setHistoryDepth] = useState(0);
   const [minStaking, setMinStaking] = useState(0);
 
   useEffect(() => {
@@ -17,8 +16,6 @@ function Main (props) {
     setBlocksPerEra(blockPerEra);
     const stakers = api.consts.dappsStaking.maxNumberOfStakersPerContract.toNumber();
     setMaxStakers(stakers);
-    const depth = api.consts.dappsStaking.historyDepth.toNumber();
-    setHistoryDepth(depth);
     const stakingAmount = api.consts.dappsStaking.minimumStakingAmount.valueOf();
     setMinStaking(parseInt(stakingAmount / DECIMALS));
     return () => unsubscribe;
@@ -42,13 +39,6 @@ function Main (props) {
         </Step.Content>
       </Step>
 
-      <Step active>
-        <Icon name='exclamation triangle' />
-        <Step.Content>
-          <Step.Title>{historyDepth}</Step.Title>
-          <Step.Description>Rewards expire (in eras) </Step.Description>
-        </Step.Content>
-      </Step>
       <Step active>
         <Icon name='money bill alternate' />
         <Step.Content>

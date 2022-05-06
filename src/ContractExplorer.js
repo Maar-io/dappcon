@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Grid, Form, Dropdown, Table, Header, Icon } from 'semantic-ui-react';
 import { useSubstrate } from './substrate-lib';
+import { projectContractName } from './NamedContracts';
 const DECIMALS = 1_000_000_000_000_000_000;
 
 function Main (props) {
@@ -15,6 +16,7 @@ function Main (props) {
   const [erasToClaim, setErasToClaim] = useState(0);
   const [firstTime, setFirstTimeStaked] = useState(0);
   const [unclaimedEras, setUnclaimedEras] = useState(0);
+  const [projectName, setProjectName] = useState('');
 
   const getAddressEnum = (address) => ({ Evm: address });
 
@@ -25,6 +27,7 @@ function Main (props) {
     setClaimedRewards('?');
     setErasToClaim(0);
     setUnclaimedEras('');
+    setProjectName('');
   };
 
   const onContractChange = (_, data) => {
@@ -32,6 +35,7 @@ function Main (props) {
     console.log('onContractChange value', data.value);
     setSelectedContract(data.value);
     setFormState(data.value);
+    setProjectName(projectContractName[data.value]);
   };
 
   const querycontractEraStakeMap = () => {
@@ -95,17 +99,22 @@ function Main (props) {
               // calculate claimed rewards
               let rewarded = 0;
               let unclaimedEra = '';
-              for (let era = firstStaked; era < currentEra; era++) {
+              for (let era = firstStaked; era <= currentEra; era++) {
                 const contractStakeInfo = contractEraStakeMap.get(era);
                 const eraInfo = eraInfoMap.get(era);
-                if (contractStakeInfo.contractRewardClaimed) {
-                  const ratio = contractStakeInfo.total / eraInfo.staked;
-                  // console.log('ratio', ratio);
-                  // console.log('available ', eraInfo.rewards.dapps / DECIMALS);
-                  // console.log('rewarded ', eraInfo.rewards.dapps * ratio / DECIMALS);
-                  rewarded += eraInfo.rewards.dapps * ratio;
+                if (contractStakeInfo) {
+                  if (contractStakeInfo.contractRewardClaimed) {
+                    const ratio = contractStakeInfo.total / eraInfo.staked;
+                    // console.log('ratio', ratio);
+                    // console.log('available ', eraInfo.rewards.dapps / DECIMALS);
+                    // console.log('rewarded ', eraInfo.rewards.dapps * ratio / DECIMALS);
+                    rewarded += eraInfo.rewards.dapps * ratio;
+                  } else {
+                    unclaimedEra += era.toString() + ' ';
+                  }
+                  // console.log('contractStakeInfo = ', era + ' => ' + parseInt(contractStakeInfo.total / DECIMALS) + ' ' + contractStakeInfo.contractRewardClaimed);
                 } else {
-                  unclaimedEra += era.toString() + ' ';
+                  console.log(selectedContract + ' missing contractStakeInfo for era', era);
                 }
               }
               console.log('claimedRewards', parseInt(rewarded / DECIMALS));
@@ -168,7 +177,7 @@ function Main (props) {
 
   return (
     <Grid.Column width={8}>
-      <h1>Contract Explorer</h1>
+      <h1>Contract Explorer - {projectName}</h1>
       <Form>
         <Form.Field>
           <Dropdown
@@ -218,7 +227,7 @@ function DisplayTable (props) {
               <Header as='h2'>
                 <Header.Content>
                   {props.firstTime}
-                  <Header.Subheader>First Time Staked</Header.Subheader>
+                  <Header.Subheader>First Era Staked</Header.Subheader>
                 </Header.Content>
               </Header>
             </Table.Cell>

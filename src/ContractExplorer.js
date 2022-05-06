@@ -7,8 +7,6 @@ function Main (props) {
   const { api } = useSubstrate();
   const [contracts, setContracts] = useState([]);
   const [selectedContract, setSelectedContract] = useState(0);
-  const [oldestToClaim, setOldestToClaim] = useState(0);
-  const [lastStaked, setLastStaked] = useState(0);
   const [formState, setFormState] = useState(0);
   const [developer, setDeveloper] = useState(0);
   const [totalStaked, setTotalStaked] = useState(0);
@@ -17,14 +15,10 @@ function Main (props) {
   const [erasToClaim, setErasToClaim] = useState(0);
   const [firstTime, setFirstTimeStaked] = useState(0);
 
-  const getAddressEnum = (address) => (
-    { Evm: address }
-  );
+  const getAddressEnum = (address) => ({ Evm: address });
 
   const resetContractInfo = () => {
     setDeveloper(0);
-    setLastStaked(0);
-    setOldestToClaim(0);
     setNumStakers('?');
     setTotalStaked(0);
     setClaimedRewards('?');
@@ -38,79 +32,86 @@ function Main (props) {
     setFormState(data.value);
   };
 
-  const queryEraStakeMap = () => {
+  const querycontractEraStakeMap = () => {
     const getInfo = async () => {
-      const eraStakeMap = new Map();
+      const contractEraStakeMap = new Map();
+      const eraInfoMap = new Map();
 
       try {
-        const eraMap = await api.query.dappsStaking.contractEraStake.entries(
-          getAddressEnum(selectedContract)
-        );
-        console.log('contractEraStake.entries ', eraMap);
-        eraMap.forEach(([key, points]) => {
+        // fetch all contractEraStake entries for selected contract and convert to map
+        const contractEraStakeEntries =
+          await api.query.dappsStaking.contractEraStake.entries(
+            getAddressEnum(selectedContract)
+          );
+        contractEraStakeEntries.forEach(([key, points]) => {
           // console.log('[key, points] = ', key, points);
           const eraKey = parseInt(key.args.map((k) => k.toString())[1]);
           // console.log('eraKey', eraKey);
-          eraStakeMap.set(eraKey, points.toJSON());
+          contractEraStakeMap.set(eraKey, points.toJSON());
         });
 
-        console.log('queryEraStakeMap eraStakeMap', eraStakeMap);
-        if (eraStakeMap.size !== 0) {
-          // TODO: Not correct anymore since the map is no longer sparse - we have entry for each era.
-          // contract last staked
-          const lastStaked = Math.max(...eraStakeMap.keys());
-          console.log('queryEraStakeMap lastStaked', lastStaked);
-          setLastStaked(lastStaked);
+        // fetch all generalEraInfo entries and convert to map
+        const eraInfoEntires =
+          await api.query.dappsStaking.generalEraInfo.entries();
+        eraInfoEntires.forEach(([key, eraInfo]) => {
+          const eraKey = parseInt(key.args.map((k) => k.toString())[0]);
+          // console.log('eraKey', eraKey);
+          // console.log('eraInfo', eraInfo.toJSON());
+          eraInfoMap.set(eraKey, eraInfo.toJSON());
+        });
 
-          // number of stakers
-          const entry = eraStakeMap.get(lastStaked);
-          const stakerNum = parseInt(entry.number_of_stakers);
-          console.log('queryEraStakeMap stakerNum', stakerNum);
-          setNumStakers(stakerNum);
+        // calculate unclaimed eras
+        let unclaimed = 0;
+        contractEraStakeMap.forEach((contractStakeInfo) => {
+          // console.log('contractStakeInfo = ', contractStakeInfo);
+          if (contractStakeInfo.contractRewardClaimed === false) unclaimed++;
+        });
+        console.log('unclaimed eras', unclaimed);
+        setErasToClaim(unclaimed);
 
-          // total staked on the contract
-          const total = parseInt(entry.total / DECIMALS);
-          console.log('queryEraStakeMap total', total);
-          setTotalStaked(total);
+        if (contractEraStakeMap.size !== 0) {
+          // First era with staking record
+          const firstStaked = Math.min(...contractEraStakeMap.keys());
+          setFirstTimeStaked(firstStaked);
+          console.log('firstStakedEra', firstStaked);
 
-          // last claimed amount of rewards on the contract
-          // TODO: this isn't valid anymore
-          const rewards = 0;
-          console.log('queryEraStakeMap last claimed_rewards', rewards);
-          // oldest era to Claim
-          api.query.dappsStaking.currentEra(currentEra => {
-            // TODO: there is no more history depth
-            const historyDepth = currentEra;
-            let firstStakedEra = Math.min(...eraStakeMap.keys());
-            setClaimedRewards(0);
-            setFirstTimeStaked(firstStakedEra);
-            firstStakedEra = Math.max(firstStakedEra, Math.max(1, currentEra - historyDepth));
-            let oldest = firstStakedEra;
-            // find era when it was last claimed
-            for (let era = firstStakedEra; era <= currentEra; era++) {
-              const mapEntry = eraStakeMap.get(era);
-              if (typeof (mapEntry) !== 'undefined') {
-                // TODO: not relevant anymore
-                const claimed = 1;
-                setClaimedRewards(r => r + claimed);
-                // console.log('claimedRewards = ', era, claimed);
-                if (claimed === 0) {
-                  oldest = era - 1;
-                  // console.log('oldest  0 = ', era);
-                  break;
+          api.query.dappsStaking
+            .currentEra((currentEra) => {
+              const current = currentEra.toNumber();
+              console.log('currentEra', current);
+              const entry = contractEraStakeMap.get(current);
+
+              // number of stakers
+              const stakerNum = parseInt(entry.numberOfStakers);
+              console.log('numberOfStakers', stakerNum);
+              setNumStakers(stakerNum);
+
+              // total staked on the contract
+              const total = parseInt(entry.total / DECIMALS);
+              console.log('total', total);
+              setTotalStaked(total);
+
+              // calculate claimed rewards
+              let rewarded = 0;
+              for (let era = firstStaked; era < currentEra; era++) {
+                const contractStakeInfo = contractEraStakeMap.get(era);
+                const eraInfo = eraInfoMap.get(era);
+                if (contractStakeInfo.contractRewardClaimed) {
+                  const ratio = contractStakeInfo.total / eraInfo.staked;
+                  // console.log('ratio', ratio);
+                  // console.log('available ', eraInfo.rewards.dapps / DECIMALS);
+                  // console.log('rewarded ', eraInfo.rewards.dapps * ratio / DECIMALS);
+                  rewarded += eraInfo.rewards.dapps * ratio;
                 }
-              } else { // map entry can be undefined if there were no staking in last era
-                oldest = era - 1;
-                // console.log('oldest = ', era);
               }
-            }
-            setOldestToClaim(oldest);
-            setErasToClaim(currentEra - oldest - 1);
-          }).catch(console.error);
+              console.log('claimedRewards', parseInt(rewarded / DECIMALS));
+              setClaimedRewards(parseInt(rewarded / DECIMALS));
+            })
+            .catch(console.error);
         }
       } catch (err) {
         console.error(err);
-        console.log('queryEraStakeMap failed');
+        console.log('querycontractEraStakeMap failed');
       }
     };
     getInfo();
@@ -121,9 +122,9 @@ function Main (props) {
       try {
         const result = await api.query.dappsStaking.registeredDapps.keys();
         console.log('registeredDapps result', result);
-        const r = result.map(c => '0x' + c.toString().slice(-40));
+        const r = result.map((c) => '0x' + c.toString().slice(-40));
         // console.log(r);
-        const contractList = r.map(c => ({ key: c, value: c, text: c }));
+        const contractList = r.map((c) => ({ key: c, value: c, text: c }));
         console.log('fetchContracts', contractList);
         setContracts(contractList);
       } catch (err) {
@@ -137,21 +138,27 @@ function Main (props) {
   useEffect(() => {
     const queryDeveloper = async () => {
       try {
-        const result = await api.query.dappsStaking.registeredDapps(getAddressEnum(selectedContract));
+        const result = await api.query.dappsStaking.registeredDapps(
+          getAddressEnum(selectedContract)
+        );
         let res;
-        result.isNone ? res = 'none' : res = result.unwrap().developer.toHuman();
+        result.isNone
+          ? (res = 'none')
+          : (res = result.unwrap().developer.toHuman());
         console.log('contract=', selectedContract, 'setDeveloper to', res);
         setDeveloper(res);
       } catch (err) {
         console.error(err);
-        console.log('queryEraStakeMap registeredDapps failed');
+        console.log('querycontractEraStakeMap registeredDapps failed');
       }
     };
     queryDeveloper();
   }, [api.query.dappsStaking, selectedContract]);
 
-  // TODO: removed history depth
-  useEffect(queryEraStakeMap, [api.query.dappsStaking, selectedContract]);
+  useEffect(querycontractEraStakeMap, [
+    api.query.dappsStaking,
+    selectedContract
+  ]);
 
   return (
     <Grid.Column width={8}>
@@ -173,8 +180,6 @@ function Main (props) {
           developer={developer}
           numStakers={numStakers}
           firstTime={firstTime}
-          oldestToClaim={oldestToClaim}
-          lastStaked={lastStaked}
           totalStaked={totalStaked}
           claimedRewards={claimedRewards}
           contract={selectedContract}
@@ -182,89 +187,74 @@ function Main (props) {
         />
       </Form>
     </Grid.Column>
-
   );
 }
 
 function DisplayTable (props) {
-  return <div style={{ overflowWrap: 'break-word' }}>
-    <img alt='robots' src={`https://robohash.org/${props.contract}`} />
-    <Table>
-      <Table.Header>
-        <Table.Row>
-          <Table.HeaderCell >Contract Address</Table.HeaderCell>
-          <Table.HeaderCell >{props.contract}</Table.HeaderCell>
-        </Table.Row>
-        <Table.Row>
-          <Table.HeaderCell >Developer's account:</Table.HeaderCell>
-          <Table.HeaderCell >{props.developer}</Table.HeaderCell>
-          <Table.Cell>
-            <Header as='h2'>
-              <Header.Content>
-                {props.firstTime}
-                <Header.Subheader>First Time Staked</Header.Subheader>
-              </Header.Content>
-            </Header>
-          </Table.Cell>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        <Table.Row>
-          <Table.Cell>
-            <Header as='h2'>
-              <Header.Content>
-                {props.lastStaked}
-                <Header.Subheader>Contract Last Staked</Header.Subheader>
-              </Header.Content>
-            </Header>
-          </Table.Cell>
-          <Table.Cell >
-            <Header as='h2'>
-              <Header.Content>
-                {props.oldestToClaim}
-                <Header.Subheader>Last Era Claimed</Header.Subheader>
-              </Header.Content>
-            </Header>
-          </Table.Cell>
-          <Table.Cell>
-            <Header as='h2'>
-              <Header.Content>
-                <Icon name='user' />
-                {props.numStakers}
-                <Header.Subheader>Number of Stakers</Header.Subheader>
-              </Header.Content>
-            </Header>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>
-            <Header as='h2'>
-              <Header.Content>
-                {props.totalStaked}
-                <Header.Subheader>Total Staked</Header.Subheader>
-              </Header.Content>
-            </Header>
-          </Table.Cell>
-          <Table.Cell >
-            <Header as='h2'>
-              <Header.Content>
-                {props.claimedRewards}
-                <Header.Subheader>Claimed Rewards</Header.Subheader>
-              </Header.Content>
-            </Header>
-          </Table.Cell>
-          <Table.Cell>
-            <Header as='h2'>
-              <Header.Content>
-                {props.erasToClaim}
-                <Header.Subheader>Unclaimed eras</Header.Subheader>
-              </Header.Content>
-            </Header>
-          </Table.Cell>
-        </Table.Row>
-      </Table.Body>
-    </Table>
-  </div>;
+  return (
+    <div style={{ overflowWrap: 'break-word' }}>
+      <img alt='robots' src={`https://robohash.org/${props.contract}`} />
+      <Table>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>Contract Address</Table.HeaderCell>
+            <Table.HeaderCell>{props.contract}</Table.HeaderCell>
+          </Table.Row>
+          <Table.Row>
+            <Table.HeaderCell>Developer's account:</Table.HeaderCell>
+            <Table.HeaderCell>{props.developer}</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          <Table.Row>
+            <Table.Cell>
+              <Header as='h2'>
+                <Header.Content>
+                  {props.firstTime}
+                  <Header.Subheader>First Time Staked</Header.Subheader>
+                </Header.Content>
+              </Header>
+            </Table.Cell>
+            <Table.Cell>
+              <Header as='h2'>
+                <Header.Content>
+                  <Icon name='user' />
+                  {props.numStakers}
+                  <Header.Subheader>Number of Stakers</Header.Subheader>
+                </Header.Content>
+              </Header>
+            </Table.Cell>
+            <Table.Cell>
+              <Header as='h2'>
+                <Header.Content>
+                  {props.totalStaked}
+                  <Header.Subheader>Total Staked</Header.Subheader>
+                </Header.Content>
+              </Header>
+            </Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell>
+              <Header as='h2'>
+                <Header.Content>
+                  {props.claimedRewards}
+                  <Header.Subheader>Claimed Rewards</Header.Subheader>
+                </Header.Content>
+              </Header>
+            </Table.Cell>
+            <Table.Cell>
+              <Header as='h2'>
+                <Header.Content>
+                  {props.erasToClaim}
+                  <Header.Subheader>Unclaimed eras</Header.Subheader>
+                </Header.Content>
+              </Header>
+            </Table.Cell>
+          </Table.Row>
+        </Table.Body>
+      </Table>
+    </div>
+  );
 }
 
 export default function ContractExplorer (props) {

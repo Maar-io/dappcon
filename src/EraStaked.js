@@ -8,7 +8,8 @@ function Main (props) {
   const { api } = useSubstrate();
   const [era, setCurrentEra] = useState(0);
   const [stakedTotal, setStakedTotal] = useState(0);
-  const [rewards, setRewards] = useState(0);
+  const [totalReward, setTotalRewards] = useState(0);
+  const [dappReward, setDappRewards] = useState(0);
 
   useEffect(() => {
     let unsubscribe;
@@ -28,10 +29,12 @@ function Main (props) {
 
     api.query.dappsStaking.blockRewardAccumulator((result) => {
       if (result.isNone) {
-        setRewards('<None>');
+        setTotalRewards('<None>');
       } else {
-        const reward = parseInt(result.stakers) + parseInt(result.dapps) / DECIMALS;
-        setRewards(reward);
+        const totalReward = (parseInt(result.stakers) + parseInt(result.dapps)) / DECIMALS;
+        const dappReward = parseInt(result.dapps) / DECIMALS;
+        setTotalRewards(parseInt(totalReward));
+        setDappRewards(parseInt(dappReward));
       }
     })
       .catch(console.error);
@@ -50,9 +53,9 @@ function Main (props) {
         </Card.Content>
         <Card.Content extra>
 
-          upcoming rewards
+          dapp rewards
           <Icon name='hand point right outline' />
-          {rewards}
+          {dappReward} ({totalReward})
         </Card.Content>
       </Card>
     </Grid.Column>

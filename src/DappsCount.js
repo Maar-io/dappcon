@@ -29,7 +29,7 @@ function Main (props) {
     const fetchContracts = async () => {
       try {
         let result = await api.query.dappsStaking.registeredDapps.keys();
-        setDappsCount(result.length)
+        setDappsCount(result.length);
         result = result.map(c => '0x' + c.toString().slice(-40));
         setContracts(result);
       } catch (err) { console.error(err); }
@@ -50,8 +50,7 @@ function Main (props) {
 
             if (stakingInfo !== null) {
               // found record for ContractEraStake
-              const stakerNum = parseInt(stakingInfo.number_of_stakers);
-              console.log('Num stakers =', stakerNum);
+              const stakerNum = parseInt(stakingInfo.numberOfStakers);
               setNumStakers(s => s + stakerNum);
               break;
             }
@@ -90,7 +89,7 @@ function Main (props) {
           />
         </Card.Content>
         <Card.Content extra>
-          Stakers Count and Capacity:
+          Stakers Cnt and Capacity:
           <Icon name='user' /> {numStakers}
           <Progress percent={fillup} indicating warning />
         </Card.Content>

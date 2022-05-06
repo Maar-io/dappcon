@@ -22,7 +22,6 @@ function Main(props) {
   const updateCallables = () => {
     api.query.dappsStaking.registeredDapps.keys().then(
       result => {
-        console.log('registeredDapps result', result);
         const r = result.map(c => '0x' + c.toString().slice(-40))
         console.log(r);
         const callables = r.map(c => ({ key: c, value: c, text: c }));

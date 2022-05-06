@@ -29,6 +29,7 @@ function Main (props) {
     const fetchContracts = async () => {
       try {
         let result = await api.query.dappsStaking.registeredDapps.keys();
+        setDappsCount(result.length)
         result = result.map(c => '0x' + c.toString().slice(-40));
         setContracts(result);
       } catch (err) { console.error(err); }

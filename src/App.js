@@ -56,6 +56,7 @@ function Main () {
   }
 
   const contextRef = createRef();
+  console.log("DappCon v3.0.1");
 
   return (
     <div ref={contextRef}>
@@ -89,7 +90,9 @@ function Main () {
         </style>
         <Grid stackable columns='equal'>
           <Grid.Row>
-            <Image src={`${process.env.PUBLIC_URL}/assets/astar_dashboard.png`} size='huge' />
+            <Image src={`${process.env.PUBLIC_URL}/assets/dappcon_logo.png`} size='huge' />
+          </Grid.Row>
+          <Grid.Row>
             <Network />
           </Grid.Row>
           <Grid.Row stretched>

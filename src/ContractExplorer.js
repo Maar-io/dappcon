@@ -14,6 +14,7 @@ function Main (props) {
   const [numStakers, setNumStakers] = useState(0);
   const [erasToClaim, setErasToClaim] = useState(0);
   const [firstTime, setFirstTimeStaked] = useState(0);
+  const [unclaimedEras, setUnclaimedEras] = useState(0);
 
   const getAddressEnum = (address) => ({ Evm: address });
 
@@ -23,6 +24,7 @@ function Main (props) {
     setTotalStaked(0);
     setClaimedRewards('?');
     setErasToClaim(0);
+    setUnclaimedEras('');
   };
 
   const onContractChange = (_, data) => {
@@ -55,7 +57,6 @@ function Main (props) {
           await api.query.dappsStaking.generalEraInfo.entries();
         eraInfoEntires.forEach(([key, eraInfo]) => {
           const eraKey = parseInt(key.args.map((k) => k.toString())[0]);
-          // console.log('eraKey', eraKey);
           // console.log('eraInfo', eraInfo.toJSON());
           eraInfoMap.set(eraKey, eraInfo.toJSON());
         });
@@ -67,7 +68,7 @@ function Main (props) {
           if (contractStakeInfo.contractRewardClaimed === false) unclaimed++;
         });
         console.log('unclaimed eras', unclaimed);
-        setErasToClaim(unclaimed);
+        setErasToClaim(unclaimed - 1);
 
         if (contractEraStakeMap.size !== 0) {
           // First era with staking record
@@ -93,6 +94,7 @@ function Main (props) {
 
               // calculate claimed rewards
               let rewarded = 0;
+              let unclaimedEra = '';
               for (let era = firstStaked; era < currentEra; era++) {
                 const contractStakeInfo = contractEraStakeMap.get(era);
                 const eraInfo = eraInfoMap.get(era);
@@ -102,10 +104,14 @@ function Main (props) {
                   // console.log('available ', eraInfo.rewards.dapps / DECIMALS);
                   // console.log('rewarded ', eraInfo.rewards.dapps * ratio / DECIMALS);
                   rewarded += eraInfo.rewards.dapps * ratio;
+                } else {
+                  unclaimedEra += era.toString() + ' ';
                 }
               }
               console.log('claimedRewards', parseInt(rewarded / DECIMALS));
+              console.log('unclaimedEra', unclaimedEra);
               setClaimedRewards(parseInt(rewarded / DECIMALS));
+              setUnclaimedEras(unclaimedEra);
             })
             .catch(console.error);
         }
@@ -184,6 +190,7 @@ function Main (props) {
           claimedRewards={claimedRewards}
           contract={selectedContract}
           erasToClaim={erasToClaim}
+          unclaimedEras={unclaimedEras}
         />
       </Form>
     </Grid.Column>
@@ -224,6 +231,8 @@ function DisplayTable (props) {
                 </Header.Content>
               </Header>
             </Table.Cell>
+          </Table.Row>
+          <Table.Row>
             <Table.Cell>
               <Header as='h2'>
                 <Header.Content>
@@ -232,8 +241,6 @@ function DisplayTable (props) {
                 </Header.Content>
               </Header>
             </Table.Cell>
-          </Table.Row>
-          <Table.Row>
             <Table.Cell>
               <Header as='h2'>
                 <Header.Content>
@@ -242,11 +249,21 @@ function DisplayTable (props) {
                 </Header.Content>
               </Header>
             </Table.Cell>
+          </Table.Row>
+          <Table.Row>
             <Table.Cell>
               <Header as='h2'>
                 <Header.Content>
                   {props.erasToClaim}
-                  <Header.Subheader>Unclaimed eras</Header.Subheader>
+                  <Header.Subheader>Number of unclaimed eras</Header.Subheader>
+                </Header.Content>
+              </Header>
+            </Table.Cell>
+            <Table.Cell>
+              <Header as='h2'>
+                <Header.Content>
+                  {props.unclaimedEras}
+                  <Header.Subheader>Unclaimed Eras</Header.Subheader>
                 </Header.Content>
               </Header>
             </Table.Cell>

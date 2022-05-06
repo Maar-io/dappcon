@@ -44,7 +44,7 @@ function Main(props) {
     console.log('queryDeveloper selectedContract is', selectedContract);
     let res;
     api.query.dappsStaking.registeredDapps(getAddressEnum(selectedContract), result => {
-      result.isNone ? res = 'none' : res = result.unwrap().toHuman();
+      result.isNone ? res = 'none' : res = result.unwrap().developer.toHuman();
       console.log('queryDeveloper res', res);
       setDeveloper(res);
     })

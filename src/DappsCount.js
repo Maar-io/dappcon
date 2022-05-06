@@ -49,7 +49,7 @@ function Main (props) {
 
             if (stakingInfo !== null) {
               // found record for ContractEraStake
-              const stakerNum = Object.keys(stakingInfo.stakers).length;
+              const stakerNum = parseInt(stakingInfo.number_of_stakers);
               console.log('Num stakers =', stakerNum);
               setNumStakers(s => s + stakerNum);
               break;
